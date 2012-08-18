@@ -86,6 +86,48 @@ namespace Hailstone
     }
 
     /// <summary>
+    /// An axis-aligned rectangle in two-dimensional space.
+    /// </summary>
+    public struct Rectangle
+    {
+        public Rectangle(double Left, double Top, double Right, double Bottom)
+        {
+            this.Left = Left;
+            this.Top = Top;
+            this.Right = Right;
+            this.Bottom = Bottom;
+        }
+
+        public Rectangle(Vector TopLeft, Vector BottomRight)
+        {
+            this.Left = TopLeft.X;
+            this.Top = TopLeft.Y;
+            this.Right = BottomRight.X;
+            this.Bottom = BottomRight.Y;
+        }
+
+        /// <summary>
+        /// The horizontal component of the left edge of the rectangle.
+        /// </summary>
+        public double Left;
+
+        /// <summary>
+        /// The vertical component of the top edge of the rectangle.
+        /// </summary>
+        public double Top;
+
+        /// <summary>
+        /// The horizontal component of the right edge of the rectangle.
+        /// </summary>
+        public double Right;
+
+        /// <summary>
+        /// The vertical component of the bottom edge of the rectangle.
+        /// </summary>
+        public double Bottom;
+    }
+
+    /// <summary>
     /// An affline transform in two-dimensional space.
     /// </summary>
     public struct Transform

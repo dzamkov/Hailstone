@@ -27,6 +27,11 @@ namespace Hailstone
         public Vector Position;
 
         /// <summary>
+        /// The velocity of this stone.
+        /// </summary>
+        public Vector Velocity;
+
+        /// <summary>
         /// The next stone after this one in the sequence, or null if does not exist.
         /// </summary>
         public Stone Next;

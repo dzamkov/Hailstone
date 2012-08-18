@@ -17,6 +17,9 @@ namespace Hailstone
             : base(640, 480, GraphicsMode.Default, Program.Title, GameWindowFlags.Default)
         {
             GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             this.TargetRenderFrequency = 200.0;
             this.VSync = VSyncMode.Off;
@@ -98,16 +101,10 @@ namespace Hailstone
             Matrix4d mat = this.WorldToDevice;
             GL.LoadMatrix(ref mat);
 
-            mat = Transform.Rotate(0.1);
-            GL.MultMatrix(ref mat);
-
-            GL.Begin(BeginMode.Quads);
-            GL.Color3(1.0f, 0.0f, 0.0f);
-            GL.Vertex2(-0.5, 0.5);
-            GL.Vertex2(-0.5, -0.5);
-            GL.Vertex2(0.5, -0.5);
-            GL.Vertex2(0.5, 0.5);
-            GL.End();
+            Render r;
+            Draw.Begin(out r);
+            Draw.Test(r);
+            Draw.End(r);
 
             this.SwapBuffers();
         }

@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -47,8 +48,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="Draw.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Render.cs" />
     <Compile Include="Sequence.cs" />
     <Compile Include="Stone.cs" />
     <Compile Include="Textures.Designer.cs">
