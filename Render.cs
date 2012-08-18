@@ -97,7 +97,15 @@ namespace Hailstone
         /// <summary>
         /// Draws a vertex with the given properties.
         /// </summary>
-        public abstract void Vertex(Vector Position, Vector UV, Color4 Color);
+        public abstract void Vertex(double X, double Y, double U, double V, Color4 Color);
+
+        /// <summary>
+        /// Draws a vertex with the given properties.
+        /// </summary>
+        public void Vertex(Vector Position, Vector UV, Color4 Color)
+        {
+            this.Vertex(Position.X, Position.Y, UV.X, UV.Y, Color);
+        }
 
         /// <summary>
         /// Closes the rendering context and sends all given vertices for rendering.
@@ -123,11 +131,11 @@ namespace Hailstone
             GL.Begin(Mode);
         }
 
-        public override void Vertex(Vector Position, Vector UV, Color4 Color)
+        public override void Vertex(double X, double Y, double U, double V, Color4 Color)
         {
             GL.Color4(Color);
-            GL.TexCoord2(UV);
-            GL.Vertex2(Position);
+            GL.TexCoord2(U, V);
+            GL.Vertex2(X, Y);
         }
 
         public override void Finish()

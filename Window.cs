@@ -104,6 +104,15 @@ namespace Hailstone
             Render r;
             Draw.Begin(out r);
             Draw.Test(r);
+
+            Random rand = new Random(1);
+            for (int t = 0; t < 100; t++)
+            {
+                double x = rand.NextDouble() * 10.0;
+                double y = rand.NextDouble() * 10.0;
+                Draw.Number(r, (uint)rand.Next(0, 10000), new Color4(0.0f, 0.0f, 0.0f, 1.0f), new Vector(x, y), 0.1, 0.08);
+            }
+
             Draw.End(r);
 
             this.SwapBuffers();
