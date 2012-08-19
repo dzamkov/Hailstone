@@ -27,6 +27,23 @@ namespace Hailstone
                 this._Camera.ZoomTo(e.DeltaPrecise, this.WindowToWorld.Project(e.X, e.Y));
             };
 
+            this.Mouse.ButtonDown += delegate(object sender, MouseButtonEventArgs e)
+            {
+                Vector pos = this.WindowToWorld.Project(e.X, e.Y);
+                if (e.Button == MouseButton.Left)
+                {
+                    Stone stone = this._World.Pick(pos);
+                    if (stone != null)
+                    {
+                        Stone.Selection = new Chain(stone, this._World.Stones[1]);
+                    }
+                    else
+                    {
+                        Stone.Selection = null;
+                    }
+                }
+            };
+
             this.VSync = VSyncMode.Off;
 
             this._World = new World(HailstoneSequence.Instance);
@@ -113,7 +130,7 @@ namespace Hailstone
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            if ((this._Cycle = (this._Cycle + 1) % 10) == 0 && this._World.Stones.Count < 200)
+            if ((this._Cycle = (this._Cycle + 1) % 5) == 0 && this._World.Stones.Count < 200)
             {
                 this._World.Insert(this._Next++);
             }
@@ -121,6 +138,7 @@ namespace Hailstone
             this.Title = String.Format("{0} ({1:#} fps)", Program.Title, this.RenderFrequency);
             this._Camera.Update(e.Time);
             this._World.Update(e.Time);
+            Stone.SelectionGlowPhase += e.Time * 4.0;
         }
 
         private uint _Next;

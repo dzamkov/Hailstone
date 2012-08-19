@@ -60,6 +60,7 @@
       <DependentUpon>Textures.resx</DependentUpon>
     </Compile>
     <Compile Include="Window.cs" />
+    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Textures.resx">

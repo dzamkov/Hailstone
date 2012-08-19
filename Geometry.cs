@@ -101,6 +101,17 @@ namespace Hailstone
         }
 
         /// <summary>
+        /// Gets the normal form of this vector.
+        /// </summary>
+        public Vector Normal
+        {
+            get
+            {
+                return this / this.Length;
+            }
+        }
+
+        /// <summary>
         /// Gets the cross product of a vector (equivalent to rotating the vector 90 degrees counter-clockwise).
         /// </summary>
         public Vector Cross

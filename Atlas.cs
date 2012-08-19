@@ -166,9 +166,33 @@ namespace Hailstone
         /// </summary>
         public static void DrawStone(Render Render, Stone Stone, double Extent)
         {
-            float light = (float)Math.Max(0.0, Math.Min(1.0, (Extent - 80.0) / 50.0));
+            Color4 fillcolor = new Color4(0.4f, 0.7f, 1.0f, 1.0f);
+            Color4 bordercolor = new Color4(0.9f, 1.0f, 0.9f, 1.0f);
+            Color4 linecolor = bordercolor;
+            Color4 textcolor = new Color4(0.9f, 1.0f, 1.0f, 1.0f);
+
+            uint selection = Stone.GetSelectionIndex(Stone);
+            if (selection != uint.MaxValue)
+            {
+                selection = (uint)Stone.Selection.Length - selection;
+
+                float glow = (float)Math.Sin(Stone.SelectionGlowPhase + selection * 0.3) * 0.5f + 0.5f;
+                bordercolor = new Color4(1.0f, 0.5f + glow * 0.5f, 0.4f + glow * 0.5f, 1.0f);
+                fillcolor = new Color4(0.8f + glow * 0.1f, 0.4f + glow * 0.2f, 0.4f + glow * 0.2f, 1.0f);
+                if (selection != 0)
+                    linecolor = bordercolor;
+                if (selection != 0 && Stone.Next != null && Stone.Next != Stone)
+                {
+                    Vector markerpos = Stone.Position + (Stone.Next.Position - Stone.Position).Normal.Cross * (Stone.Radius + 0.5);
+                    Atlas.DrawNumber(Render, selection, new Color4(1.0f, 0.4f, 0.4f, 0.7f), markerpos, Stone.NumberSize, Stone.NumberSize);
+                }
+            }
+            
+            float light = (float)Math.Max(0.0, Math.Min(1.0, (Extent - 50.0) / 100.0));
             double size = Math.Max(1.0, Extent * 0.01);
-            Atlas.DrawFilledCircle(Render, new Color4(0.4f + light * 0.5f, 0.7f + light * 0.3f, 1.0f, 1.0f), Stone.Position, Stone.Radius * size);
+            fillcolor.R += light * 0.5f;
+            fillcolor.G += light * 0.3f;
+            Atlas.DrawFilledCircle(Render, fillcolor, Stone.Position, Stone.Radius * size);
 
             if (Extent < 120.0)
             {
@@ -182,13 +206,13 @@ namespace Hailstone
                     if (linklen > 0.0)
                     {
                         if (linklen >= Stone.LinkArrowLength)
-                            Atlas.DrawArrow(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                            Atlas.DrawArrow(Render, linecolor, start, dir, linklen, Stone.LinkWidth);
                         else
-                            Atlas.DrawLine(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                            Atlas.DrawLine(Render, linecolor, start, dir, linklen, Stone.LinkWidth);
                     }
                 }
-                Atlas.DrawCircle(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), Stone.Position, Stone.Radius);
-                Atlas.DrawNumber(Render, Stone.Number, new Color4(0.9f, 1.0f, 1.0f, 1.0f), Stone.Position, Stone.NumberSize, Stone.NumberSize * 0.8);
+                Atlas.DrawCircle(Render, bordercolor, Stone.Position, Stone.Radius);
+                Atlas.DrawNumber(Render, Stone.Number, textcolor, Stone.Position, Stone.NumberSize, Stone.NumberSize * 0.8);
             }
         }
 

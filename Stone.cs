@@ -24,27 +24,32 @@ namespace Hailstone
         /// <summary>
         /// The width of the links between stones.
         /// </summary>
-        public static readonly double LinkWidth = 0.05;
+        public static readonly double LinkWidth = 0.07;
 
         /// <summary>
         /// The minimum length between stones before an arrow link appears.
         /// </summary>
-        public static readonly double LinkArrowLength = 1.0;
+        public static readonly double LinkArrowLength = 0.8;
+
+        /// <summary>
+        /// The target length for a link.
+        /// </summary>
+        public static readonly double LinkTargetLength = 1.7;
 
         /// <summary>
         /// The force per unit length applied by a link.
         /// </summary>
-        public static readonly double LinkForce = 0.6;
+        public static readonly double LinkForce = 25.0;
 
         /// <summary>
         /// The repulsion force applied by nearby stones.
         /// </summary>
-        public static readonly double RepelForce = 20.0;
+        public static readonly double RepelForce = 60.0;
 
         /// <summary>
         /// The drag force for stones.
         /// </summary>
-        public static readonly double DragForce = 1.0;
+        public static readonly double DragForce = 10.0;
 
         /// <summary>
         /// The number this stone represents.
@@ -111,8 +116,8 @@ namespace Hailstone
             {
                 Vector dif = next.Position - this.Position;
                 double len = dif.Length;
-                this.Impluse(dif * LinkImpulse * len);
-                next.Impluse(dif * -LinkImpulse * len);
+                this.Impluse(dif * LinkImpulse * (len - Stone.LinkTargetLength));
+                next.Impluse(dif * -LinkImpulse * (len - Stone.LinkTargetLength));
             }
 
             this.Position += this.Velocity * Time;
@@ -121,130 +126,106 @@ namespace Hailstone
             double drag = Stone.DragForce * this.Radius / this.Mass;
             if (speed > 0.001) this.Velocity *= (Math.Sqrt(1.0 + 4.0 * speed * drag * Time) - 1.0) / (2.0 * speed * drag * Time);
         }
+
+        /// <summary>
+        /// Gets or sets the currently-selected chain.
+        /// </summary>
+        public static Chain Selection
+        {
+            get
+            {
+                return _Selection;
+            }
+            set
+            {
+                if (_Selection != value)
+                {
+                    if (_Selection != null)
+                    {
+                        foreach (Stone stone in _Selection.Stones)
+                        {
+                            stone._SelectionIndex = uint.MaxValue;
+                        }
+                    }
+                    if (value != null)
+                    {
+                        for (int t = 0; t < value.Stones.Count; t++)
+                        {
+                            value.Stones[t]._SelectionIndex = (uint)t;
+                        }
+                    }
+                    _Selection = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The current glow phase (in radians) for the selected stones.
+        /// </summary>
+        public static double SelectionGlowPhase = 0.0;
+
+        /// <summary>
+        /// Gets the selection index for the given stone.
+        /// </summary>
+        public static uint GetSelectionIndex(Stone Stone)
+        {
+            return Stone._SelectionIndex;
+        }
+
+        private uint _SelectionIndex = uint.MaxValue;
+        private static Chain _Selection;
     }
 
     /// <summary>
-    /// An organized collection of stones.
+    /// Identifies a chain of stones.
     /// </summary>
-    public class World
+    public class Chain
     {
-        public World(Sequence Sequence)
+        public Chain(Stone Start, Stone End)
         {
-            this.Sequence = Sequence;
-            this.Stones = new Dictionary<uint, Stone>();
-            this.Unlinked = new Dictionary<uint, List<Stone>>();
+            Stone cur = Start;
+            List<Stone> stones = new List<Stone>();
+            stones.Add(cur);
+            while (cur != End)
+            {
+                cur = cur.Next;
+                stones.Add(cur);
+            }
+            this.Length = stones.Count - 1;
+            this.Stones = stones;
         }
 
         /// <summary>
-        /// The sequence that defines the relationships between stones.
+        /// The amount of steps in this chain.
         /// </summary>
-        public readonly Sequence Sequence;
+        public readonly int Length;
 
         /// <summary>
-        /// A mapping from integer values to their corresponding stone in the world.
+        /// The stones in this chain, in the order in which they appear. Note that the size of the list is one larger than 
+        /// the length of the chain.
         /// </summary>
-        public Dictionary<uint, Stone> Stones;
+        public readonly List<Stone> Stones;
 
         /// <summary>
-        /// A mapping from integer values to unlinked stones that have that as their next value.
+        /// Gets the stone at the start of this chain.
         /// </summary>
-        public Dictionary<uint, List<Stone>> Unlinked;
-
-        /// <summary>
-        /// Tries inserting a stone for the given number into this world. If one already exists, it will be
-        /// returned.
-        /// </summary>
-        public Stone Insert(uint Number)
+        public Stone Start
         {
-            Stone stone;
-            if (this.Stones.TryGetValue(Number, out stone)) return stone;
-            this.Stones[Number] = stone = new Stone(Number);
-            int influences = 0;
-
-            List<Stone> unlinked;
-            if (this.Unlinked.TryGetValue(Number, out unlinked))
+            get
             {
-                influences += unlinked.Count;
-                foreach (Stone s in unlinked)
-                {
-                    stone.Position += s.Position;
-                    s.Next = stone;
-                }
-                this.Unlinked.Remove(Number);
-            }
-
-            uint next = this.Sequence.Next(Number);
-            Stone nexts;
-            if (this.Stones.TryGetValue(next, out nexts))
-            {
-                stone.Position += nexts.Position;
-                stone.Next = nexts;
-                influences++;
-            }
-            else
-            {
-                if (Number == next)
-                    stone.Next = stone;
-                else
-                {
-                    if (!this.Unlinked.TryGetValue(next, out unlinked))
-                        this.Unlinked[next] = unlinked = new List<Stone>();
-                    unlinked.Add(stone);
-                }
-            }
-
-            if (influences > 0)
-            {
-                stone.Position /= (double)influences;
-                stone.Velocity /= (double)influences;
-                stone.Position *= 1.00001;
-                stone.Velocity *= 1.3;
-            }
-            else
-            {
-                double phase = Math.Sqrt((double)Number * 10.0);
-                stone.Position = new Vector(Math.Cos(phase), Math.Sin(phase)) * phase;
-            }
-
-            return stone;
-        }
-
-        /// <summary>
-        /// Updates the state of the world by the given time in seconds.
-        /// </summary>
-        public void Update(double Time)
-        {
-            double repelimpulse = Stone.RepelForce * Time;
-            foreach (Stone a in this.Stones.Values)
-            {
-                foreach (Stone b in this.Stones.Values)
-                {
-                    if (a != b && a.Number > b.Number)
-                    {
-                        Stone.Interact(a, b, repelimpulse);
-                    }
-                }
-            }
-
-            double linkimpulse = Stone.LinkForce * Time;
-            foreach (Stone stone in this.Stones.Values)
-            {
-                stone.Update(linkimpulse, Time);
+                return this.Stones[0];
             }
         }
 
         /// <summary>
-        /// Renders this world to the current context.
+        /// Gets the stone at the end of this chain.
         /// </summary>
-        public void Render(double Extent)
+        public Stone End
         {
-            Render r;
-            Atlas.Begin(out r);
-            foreach (Stone stone in this.Stones.Values)
+            get
             {
-                Atlas.DrawStone(r, stone, Extent);
+                return this.Stones[this.Length];
             }
-            Atlas.End(r);
         }
     }
 }
