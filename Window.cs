@@ -20,16 +20,14 @@ namespace Hailstone
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-            this.TargetRenderFrequency = 200.0;
-            this.VSync = VSyncMode.Off;
             
-
             this._Camera = new Camera();
             this.Mouse.WheelChanged += delegate(object sender, MouseWheelEventArgs e)
             {
                 this._Camera.ZoomTo(e.DeltaPrecise, this.WindowToWorld.Project(e.X, e.Y));
             };
+
+            this.VSync = VSyncMode.Off;
 
             this._World = new World(HailstoneSequence.Instance);
         }
@@ -103,7 +101,7 @@ namespace Hailstone
             Transform trans = this.WorldToDevice;
             Matrix4d mat = trans;
             GL.LoadMatrix(ref mat);
-            this._World.Render(trans);
+            this._World.Render(this._Camera.Extent);
 
             this.SwapBuffers();
         }
@@ -115,7 +113,7 @@ namespace Hailstone
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            if ((this._Cycle = (this._Cycle + 1) % 500) == 0)
+            if ((this._Cycle = (this._Cycle + 1) % 10) == 0 && this._World.Stones.Count < 200)
             {
                 this._World.Insert(this._Next++);
             }

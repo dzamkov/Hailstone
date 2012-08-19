@@ -236,13 +236,13 @@ namespace Hailstone
         /// <summary>
         /// Renders this world to the current context.
         /// </summary>
-        public void Render(Transform WorldToDevice)
+        public void Render(double Extent)
         {
             Render r;
             Atlas.Begin(out r);
             foreach (Stone stone in this.Stones.Values)
             {
-                Atlas.DrawStone(r, stone);
+                Atlas.DrawStone(r, stone, Extent);
             }
             Atlas.End(r);
         }

@@ -39,6 +39,16 @@ namespace Hailstone
         public double Zoom = 0.0;
 
         /// <summary>
+        /// The minimum zoom level of the camera.
+        /// </summary>
+        public double MinZoom = -10.0;
+
+        /// <summary>
+        /// The maximum zoom level of the camera.
+        /// </summary>
+        public double MaxZoom = 0.0;
+
+        /// <summary>
         /// The change in zoom level, per second.
         /// </summary>
         public double ZoomVelocity = 0.0;
@@ -76,6 +86,16 @@ namespace Hailstone
             this.Velocity *= Math.Pow(this.Damping, Time);
             this.Zoom += this.ZoomVelocity * Time;
             this.ZoomVelocity *= Math.Pow(this.ZoomDamping, Time);
+            if (this.Zoom < this.MinZoom)
+            {
+                this.Zoom = this.MinZoom;
+                this.ZoomVelocity = 0.0;
+            }
+            if (this.Zoom > this.MaxZoom)
+            {
+                this.Zoom = this.MaxZoom;
+                this.ZoomVelocity = 0.0;
+            }
         }
 
         /// <summary>

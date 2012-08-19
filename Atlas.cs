@@ -164,26 +164,32 @@ namespace Hailstone
         /// <summary>
         /// Draws a stone along with its "Next" link.
         /// </summary>
-        public static void DrawStone(Render Render, Stone Stone)
+        public static void DrawStone(Render Render, Stone Stone, double Extent)
         {
-            Atlas.DrawFilledCircle(Render, new Color4(0.4f, 0.7f, 1.0f, 1.0f), Stone.Position, Stone.Radius);
-            if (Stone.Next != null && Stone.Next != Stone)
+            float light = (float)Math.Max(0.0, Math.Min(1.0, (Extent - 80.0) / 50.0));
+            double size = Math.Max(1.0, Extent * 0.01);
+            Atlas.DrawFilledCircle(Render, new Color4(0.4f + light * 0.5f, 0.7f + light * 0.3f, 1.0f, 1.0f), Stone.Position, Stone.Radius * size);
+
+            if (Extent < 120.0)
             {
-                Vector dif = Stone.Next.Position - Stone.Position;
-                double len = dif.Length;
-                Vector dir = dif / len;
-                Vector start = Stone.Position + dir * Stone.Radius;
-                double linklen = len - Stone.Radius - Stone.Next.Radius;
-                if (linklen > 0.0)
+                if (Stone.Next != null && Stone.Next != Stone)
                 {
-                    if (linklen >= Stone.LinkArrowLength)
-                        Atlas.DrawArrow(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
-                    else
-                        Atlas.DrawLine(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                    Vector dif = Stone.Next.Position - Stone.Position;
+                    double len = dif.Length;
+                    Vector dir = dif / len;
+                    Vector start = Stone.Position + dir * Stone.Radius;
+                    double linklen = len - Stone.Radius - Stone.Next.Radius;
+                    if (linklen > 0.0)
+                    {
+                        if (linklen >= Stone.LinkArrowLength)
+                            Atlas.DrawArrow(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                        else
+                            Atlas.DrawLine(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                    }
                 }
+                Atlas.DrawCircle(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), Stone.Position, Stone.Radius);
+                Atlas.DrawNumber(Render, Stone.Number, new Color4(0.9f, 1.0f, 1.0f, 1.0f), Stone.Position, Stone.NumberSize, Stone.NumberSize * 0.8);
             }
-            Atlas.DrawCircle(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), Stone.Position, Stone.Radius);
-            Atlas.DrawNumber(Render, Stone.Number, new Color4(0.9f, 1.0f, 1.0f, 1.0f), Stone.Position, Stone.NumberSize, Stone.NumberSize * 0.8);
         }
 
         /// <summary>

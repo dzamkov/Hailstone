@@ -18,7 +18,7 @@ namespace Hailstone
         /// </summary>
         public static void Main()
         {
-            new Window().Run();
+            new Window().Run(60.0);
         }
     }
 }
