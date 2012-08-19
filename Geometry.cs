@@ -48,11 +48,27 @@ namespace Hailstone
         }
 
         /// <summary>
+        /// Gets the inverse of a vector.
+        /// </summary>
+        public static Vector operator -(Vector A)
+        {
+            return new Vector(-A.X, -A.Y);
+        }
+
+        /// <summary>
         /// Gets the product of a vector and a scalar.
         /// </summary>
         public static Vector operator *(Vector A, double B)
         {
             return new Vector(A.X * B, A.Y * B);
+        }
+
+        /// <summary>
+        /// Gets the inverse product of a vector and a scalar.
+        /// </summary>
+        public static Vector operator /(Vector A, double B)
+        {
+            return new Vector(A.X / B, A.Y / B);
         }
 
         /// <summary>
@@ -81,6 +97,17 @@ namespace Hailstone
             get
             {
                 return Math.Sqrt(this.X * this.X + this.Y * this.Y);
+            }
+        }
+
+        /// <summary>
+        /// Gets the cross product of a vector (equivalent to rotating the vector 90 degrees counter-clockwise).
+        /// </summary>
+        public Vector Cross
+        {
+            get
+            {
+                return new Vector(-this.Y, this.X);
             }
         }
     }
@@ -268,6 +295,11 @@ namespace Hailstone
         public static Transform operator *(Transform A, Transform B)
         {
             return Transform.Compose(A, B);
+        }
+
+        public static Vector operator *(Transform A, Vector B)
+        {
+            return A.Project(B);
         }
 
         public static implicit operator OpenTK.Matrix4d(Transform Source)

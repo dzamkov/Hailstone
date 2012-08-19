@@ -6,7 +6,7 @@ using System.Text;
 namespace Hailstone
 {
     /// <summary>
-    /// A visual representation of a value in a sequence.
+    /// A visual representation of a value in a sequence (what else am I supposed to call these things?).
     /// </summary>
     public class Stone
     {

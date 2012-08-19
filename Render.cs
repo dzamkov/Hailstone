@@ -143,4 +143,90 @@ namespace Hailstone
             GL.End();
         }
     }
+
+    /// <summary>
+    /// Contains information for drawing a shape or figure from a texture.
+    /// </summary>
+    public struct Shape
+    {
+        public Shape(Rectangle Source, Rectangle Destination)
+        {
+            this.Source = Source;
+            this.Destination = Destination;
+        }
+
+        public Shape(Rectangle Source, Rectangle Destination, double Border)
+        {
+            this.Source = Source;
+            this.Destination = Destination;
+            _Expand(ref this.Source, ref this.Destination, Border, Border);
+        }
+
+        public Shape(Rectangle Source, Rectangle Destination, double UBorder, double VBorder)
+        {
+            this.Source = Source;
+            this.Destination = Destination;
+            _Expand(ref this.Source, ref this.Destination, UBorder, VBorder);
+        }
+
+        public Shape(Rectangle Source, double Border)
+        {
+            double swidth = Source.Right - Source.Left;
+            double sheight = Source.Bottom - Source.Top;
+            double scale = 1.0 / sheight;
+
+            this.Source = Source;
+            this.Destination = new Rectangle(-swidth * scale * 0.5, 0.5, swidth * scale * 0.5, -0.5);
+            _Expand(ref this.Source, ref this.Destination, Border, Border);
+        }
+
+        /// <summary>
+        /// Applies a border to a shape.
+        /// </summary>
+        private static void _Expand(ref Rectangle Source, ref Rectangle Destination, double UBorder, double VBorder)
+        {
+            double wborder = UBorder * (Destination.Right - Destination.Left) / (Source.Right - Source.Left);
+            double hborder = VBorder * (Destination.Top - Destination.Bottom) / (Source.Bottom - Source.Top);
+            Source.Left -= UBorder;
+            Source.Top -= VBorder;
+            Source.Right += UBorder;
+            Source.Bottom += VBorder;
+            Destination.Left -= wborder;
+            Destination.Top += hborder;
+            Destination.Right += wborder;
+            Destination.Bottom -= hborder;
+        }
+
+        /// <summary>
+        /// The source rectangle for the shape, in UV coordinates.
+        /// </summary>
+        public Rectangle Source;
+
+        /// <summary>
+        /// The destination rectangle for the shape, in world coordinates.
+        /// </summary>
+        public Rectangle Destination;
+
+        /// <summary>
+        /// Draws this shape using the given modulating color and transform.
+        /// </summary>
+        public void Draw(Render Render, Color4 Color, Transform Transform)
+        {
+            Render.Vertex(Transform * Destination.TopLeft, Source.TopLeft, Color);
+            Render.Vertex(Transform * Destination.BottomLeft, Source.BottomLeft, Color);
+            Render.Vertex(Transform * Destination.BottomRight, Source.BottomRight, Color);
+            Render.Vertex(Transform * Destination.TopRight, Source.TopRight, Color);
+        }
+
+        /// <summary>
+        /// Draws this shape using the given scale and offset.
+        /// </summary>
+        public void Draw(Render Render, Color4 Color, Vector Offset, double Scale)
+        {
+            Render.Vertex(Destination.TopLeft * Scale + Offset, Source.TopLeft, Color);
+            Render.Vertex(Destination.BottomLeft * Scale + Offset, Source.BottomLeft, Color);
+            Render.Vertex(Destination.BottomRight * Scale + Offset, Source.BottomRight, Color);
+            Render.Vertex(Destination.TopRight * Scale + Offset, Source.TopRight, Color);
+        }
+    }
 }

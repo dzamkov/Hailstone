@@ -102,17 +102,21 @@ namespace Hailstone
             GL.LoadMatrix(ref mat);
 
             Render r;
-            Draw.Begin(out r);
+            Atlas.Begin(out r);
 
             Random rand = new Random(1);
-            for (int t = 0; t < 20; t++)
+            Vector last = Vector.Zero;
+            Vector dir = new Vector(0.0, 1.0);
+            for (int t = 0; t < 4000; t++)
             {
-                double x = rand.NextDouble() * 10.0;
-                double y = rand.NextDouble() * 10.0;
-                Draw.Stone(r, (uint)rand.Next(1, 1000), new Color4(1.0f, 1.0f, 0.8f, 1.0f), new Color4(0.4f, 0.7f, 1.0f, 1.0f), new Vector(x, y), 0.2);
+                dir += new Vector(rand.NextDouble() - 0.5, rand.NextDouble() - 0.5);
+                dir /= dir.Length;
+                Vector cur = last + dir;
+                Atlas.DrawLine(r, new Color4(0.9f, 1.0f, 0.9f, 1.0f), last, cur, 0.5);
+                last = cur;
             }
 
-            Draw.End(r);
+            Atlas.End(r);
 
             this.SwapBuffers();
         }

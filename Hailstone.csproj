@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="Draw.cs" />
+    <Compile Include="Atlas.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Render.cs" />
