@@ -30,6 +30,8 @@ namespace Hailstone
             {
                 this._Camera.ZoomTo(e.DeltaPrecise, this.WindowToWorld.Project(e.X, e.Y));
             };
+
+            this._World = new World(HailstoneSequence.Instance);
         }
 
         /// <summary>
@@ -98,25 +100,10 @@ namespace Hailstone
             GL.ClearColor(0.5f, 0.7f, 0.9f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            Matrix4d mat = this.WorldToDevice;
+            Transform trans = this.WorldToDevice;
+            Matrix4d mat = trans;
             GL.LoadMatrix(ref mat);
-
-            Render r;
-            Atlas.Begin(out r);
-
-            Random rand = new Random(1);
-            Vector last = Vector.Zero;
-            Vector dir = new Vector(0.0, 1.0);
-            for (int t = 0; t < 4000; t++)
-            {
-                dir += new Vector(rand.NextDouble() - 0.5, rand.NextDouble() - 0.5);
-                dir /= dir.Length;
-                Vector cur = last + dir;
-                Atlas.DrawLine(r, new Color4(0.9f, 1.0f, 0.9f, 1.0f), last, cur, 0.5);
-                last = cur;
-            }
-
-            Atlas.End(r);
+            this._World.Render(trans);
 
             this.SwapBuffers();
         }
@@ -128,10 +115,19 @@ namespace Hailstone
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            if ((this._Cycle = (this._Cycle + 1) % 2000) == 0)
+            {
+                this._World.Insert(this._Next++);
+            }
+
             this.Title = String.Format("{0} ({1:#} fps)", Program.Title, this.RenderFrequency);
             this._Camera.Update(e.Time);
+            this._World.Update(e.Time);
         }
 
+        private uint _Next;
+        private int _Cycle;
         private Camera _Camera;
+        private World _World;
     }
 }

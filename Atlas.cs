@@ -25,7 +25,7 @@ namespace Hailstone
             Shape[] shapes = new Shape[10];
             double delta = 0.099609375;
             double left = 0.0078125;
-            double right = 0.98828125;
+            double right = 0.091796875;
             for (int t = 0; t < 10; t++)
             {
                 shapes[t] = new Shape(new Rectangle(left, 0.8359375, right, 0.953125), 0.0078125);
@@ -130,6 +130,14 @@ namespace Hailstone
         }
 
         /// <summary>
+        /// Draws a line starting at a given point going in the given direction for the given length.
+        /// </summary>
+        public static void DrawLine(Render Render, Color4 Color, Vector Start, Vector Direction, double Length, double Width)
+        {
+            LineSegment.Draw(Render, Color, new Transform(Start, -Direction.Cross * Width, Direction * Length));
+        }
+
+        /// <summary>
         /// Draws an arrow connecting two points.
         /// </summary>
         public static void DrawArrow(Render Render, Color4 Color, Vector A, Vector B, double Width)
@@ -144,13 +152,38 @@ namespace Hailstone
         }
 
         /// <summary>
-        /// Draws an unlinked stone containing the given number.
+        /// Draws an arrow starting at a given point going in the given direction for the given length.
         /// </summary>
-        public static void DrawStone(Render Render, uint Number, Vector Center, double Radius, double NumberSize)
+        public static void DrawArrow(Render Render, Color4 Color, Vector Start, Vector Direction, double Length, double Width)
         {
-            Atlas.DrawFilledCircle(Render, new Color4(0.4f, 0.7f, 1.0f, 1.0f), Center, Radius);
-            Atlas.DrawCircle(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), Center, Radius);
-            Atlas.DrawNumber(Render, Number, new Color4(0.9f, 1.0f, 1.0f, 1.0f), Center, NumberSize, NumberSize * 0.8);
+            double linelen = Length - ArrowSegment.Destination.Top * Width;
+            LineSegment.Draw(Render, Color, new Transform(Start, -Direction.Cross * Width, Direction * linelen));
+            ArrowSegment.Draw(Render, Color, new Transform(Start + Direction * linelen, -Direction.Cross * Width, Direction * Width));
+        }
+
+        /// <summary>
+        /// Draws a stone along with its "Next" link.
+        /// </summary>
+        public static void DrawStone(Render Render, Stone Stone)
+        {
+            Atlas.DrawFilledCircle(Render, new Color4(0.4f, 0.7f, 1.0f, 1.0f), Stone.Position, Stone.Radius);
+            if (Stone.Next != null && Stone.Next != Stone)
+            {
+                Vector dif = Stone.Next.Position - Stone.Position;
+                double len = dif.Length;
+                Vector dir = dif / len;
+                Vector start = Stone.Position + dir * Stone.Radius;
+                double linklen = len - Stone.Radius - Stone.Next.Radius;
+                if (linklen > 0.0)
+                {
+                    if (linklen >= Stone.LinkArrowLength)
+                        Atlas.DrawArrow(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                    else
+                        Atlas.DrawLine(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), start, dir, linklen, Stone.LinkWidth);
+                }
+            }
+            Atlas.DrawCircle(Render, new Color4(0.9f, 1.0f, 0.9f, 1.0f), Stone.Position, Stone.Radius);
+            Atlas.DrawNumber(Render, Stone.Number, new Color4(0.9f, 1.0f, 1.0f, 1.0f), Stone.Position, Stone.NumberSize, Stone.NumberSize * 0.8);
         }
 
         /// <summary>
