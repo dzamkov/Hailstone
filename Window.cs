@@ -115,7 +115,7 @@ namespace Hailstone
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            if ((this._Cycle = (this._Cycle + 1) % 2000) == 0)
+            if ((this._Cycle = (this._Cycle + 1) % 500) == 0)
             {
                 this._World.Insert(this._Next++);
             }

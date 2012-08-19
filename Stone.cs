@@ -39,12 +39,12 @@ namespace Hailstone
         /// <summary>
         /// The repulsion force applied by nearby stones.
         /// </summary>
-        public static readonly double RepelForce = 1.4;
+        public static readonly double RepelForce = 20.0;
 
         /// <summary>
-        /// The velocity damping factor for stones.
+        /// The drag force for stones.
         /// </summary>
-        public static readonly double Damping = 0.05;
+        public static readonly double DragForce = 1.0;
 
         /// <summary>
         /// The number this stone represents.
@@ -55,6 +55,17 @@ namespace Hailstone
         /// The radius of this stone.
         /// </summary>
         public readonly double Radius;
+
+        /// <summary>
+        /// Gets the mass of this stone.
+        /// </summary>
+        public double Mass
+        {
+            get
+            {
+                return this.Radius;
+            }
+        }
 
         /// <summary>
         /// The position of this stone in world-space.
@@ -70,6 +81,46 @@ namespace Hailstone
         /// The next stone after this one in the sequence, or null if does not exist.
         /// </summary>
         public Stone Next;
+
+        /// <summary>
+        /// Applies an impulse to this stone.
+        /// </summary>
+        public void Impluse(Vector Impulse)
+        {
+            this.Velocity += Impulse * (1.0 / this.Mass);
+        }
+
+        /// <summary>
+        /// Handles the interaction between two unique stones.
+        /// </summary>
+        public static void Interact(Stone A, Stone B, double RepelImpulse)
+        {
+            Vector dif = B.Position - A.Position;
+            double len = Math.Max(dif.Length, A.Radius + B.Radius);
+            A.Impluse(dif * -RepelImpulse / (len * len * len));
+            B.Impluse(dif * RepelImpulse / (len * len * len));
+        }
+
+        /// <summary>
+        /// Updates a stone.
+        /// </summary>
+        public void Update(double LinkImpulse, double Time)
+        {
+            Stone next = this.Next;
+            if (next != null && this != next)
+            {
+                Vector dif = next.Position - this.Position;
+                double len = dif.Length;
+                this.Impluse(dif * LinkImpulse * len);
+                next.Impluse(dif * -LinkImpulse * len);
+            }
+
+            this.Position += this.Velocity * Time;
+
+            double speed = this.Velocity.Length;
+            double drag = Stone.DragForce * this.Radius / this.Mass;
+            if (speed > 0.001) this.Velocity *= (Math.Sqrt(1.0 + 4.0 * speed * drag * Time) - 1.0) / (2.0 * speed * drag * Time);
+        }
     }
 
     /// <summary>
@@ -163,36 +214,22 @@ namespace Hailstone
         /// </summary>
         public void Update(double Time)
         {
-            double repelforce = Stone.RepelForce * Time;
+            double repelimpulse = Stone.RepelForce * Time;
             foreach (Stone a in this.Stones.Values)
             {
                 foreach (Stone b in this.Stones.Values)
                 {
                     if (a != b && a.Number > b.Number)
                     {
-                        Vector dif = b.Position - a.Position;
-                        double len = Math.Max(dif.Length, 0.1);
-                        a.Velocity -= dif * repelforce / (len * len * len);
-                        b.Velocity += dif * repelforce / (len * len * len);
+                        Stone.Interact(a, b, repelimpulse);
                     }
                 }
             }
 
-            double linkforce = Stone.LinkForce * Time;
-            double damping = Math.Pow(Stone.Damping, Time);
+            double linkimpulse = Stone.LinkForce * Time;
             foreach (Stone stone in this.Stones.Values)
             {
-                Stone next = stone.Next;
-                if (next != null && stone != next)
-                {
-                    Vector dif = next.Position - stone.Position;
-                    double len = dif.Length;
-                    stone.Velocity += dif * linkforce;
-                    next.Velocity -= dif * linkforce;
-                }
-
-                stone.Position += stone.Velocity * Time;
-                stone.Velocity *= damping;
+                stone.Update(linkimpulse, Time);
             }
         }
 
