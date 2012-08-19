@@ -125,6 +125,50 @@ namespace Hailstone
         /// The vertical component of the bottom edge of the rectangle.
         /// </summary>
         public double Bottom;
+
+        /// <summary>
+        /// Gets the top-left corner of this rectangle.
+        /// </summary>
+        public Vector TopLeft
+        {
+            get
+            {
+                return new Vector(this.Left, this.Top);
+            }
+        }
+
+        /// <summary>
+        /// Gets the top-right corner of this rectangle.
+        /// </summary>
+        public Vector TopRight
+        {
+            get
+            {
+                return new Vector(this.Right, this.Top);
+            }
+        }
+
+        /// <summary>
+        /// Gets the left-left corner of this rectangle.
+        /// </summary>
+        public Vector  BottomLeft
+        {
+            get
+            {
+                return new Vector(this.Left, this.Bottom);
+            }
+        }
+
+        /// <summary>
+        /// Gets the bottom-right corner of this rectangle.
+        /// </summary>
+        public Vector BottomRight
+        {
+            get
+            {
+                return new Vector(this.Right, this.Bottom);
+            }
+        }
     }
 
     /// <summary>
