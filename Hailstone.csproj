@@ -67,6 +67,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Render.cs" />
     <Compile Include="Sequence.cs" />
+    <Compile Include="SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Stone.cs" />
     <Compile Include="Textures.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -78,6 +84,9 @@
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsForm.resx">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Textures.resx">
       <Generator>ResXFileCodeGenerator</Generator>

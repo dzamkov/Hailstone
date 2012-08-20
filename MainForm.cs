@@ -17,44 +17,6 @@ namespace Hailstone
 
             this._Camera = new Camera();
             this._World = new World(HailstoneSequence.Instance);
-
-            this._GLControl.Load += delegate
-            {
-                this._Loaded = true;
-                this._GLControl.MakeCurrent();
-                this._GLControl.VSync = true;
-                GL.Enable(EnableCap.CullFace);
-                GL.Enable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            };
-
-            this._GLControl.Resize += delegate
-            {
-                GL.Viewport(0, 0, this._GLControl.Width, this._GLControl.Height);
-            };
-
-            this._GLControl.MouseWheel += delegate(object sender, MouseEventArgs e)
-            {
-                this._Camera.ZoomTo(e.Delta * 0.01, this.ControlToWorld.Project(e.X, e.Y));
-            };
-
-            this._GLControl.MouseDown += delegate(object sender, MouseEventArgs e)
-            {
-                Vector pos = this.ControlToWorld.Project(e.X, e.Y);
-                if (e.Button == MouseButtons.Left)
-                {
-                    Stone stone = this._World.Pick(pos);
-                    if (stone != null)
-                    {
-                        Stone.Selection = new Chain(stone, this._World[1]);
-                    }
-                    else
-                    {
-                        Stone.Selection = null;
-                    }
-                }
-            };
         }
 
         /// <summary>
@@ -152,6 +114,49 @@ namespace Hailstone
             this._Camera.Update(Time);
             this._World.Update(Time);
             Stone.SelectionGlowPhase += Time;
+        }
+
+        private void _GLControl_Load(object sender, EventArgs e)
+        {
+            this._Loaded = true;
+            this._GLControl.MakeCurrent();
+            this._GLControl.VSync = true;
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+        }
+
+        private void _GLControl_Resize(object sender, EventArgs e)
+        {
+            GL.Viewport(0, 0, this._GLControl.Width, this._GLControl.Height);
+        }
+
+        private void _GLControl_MouseDown(object sender, MouseEventArgs e)
+        {
+            Vector pos = this.ControlToWorld.Project(e.X, e.Y);
+            if (e.Button == MouseButtons.Left)
+            {
+                Stone stone = this._World.Pick(pos);
+                if (stone != null)
+                {
+                    Stone.Selection = new Chain(stone, this._World[1]);
+                }
+                else
+                {
+                    Stone.Selection = null;
+                }
+            }
+        }
+
+        private void _GLControl_MouseWheel(object sender, MouseEventArgs e)
+        {
+            this._Camera.ZoomTo(e.Delta * 0.01, this.ControlToWorld.Project(e.X, e.Y));
+        }
+
+        private void _SettingsButton_Click(object sender, EventArgs e)
+        {
+            SettingsForm.Show();
         }
 
         private bool _Loaded;
