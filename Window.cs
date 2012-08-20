@@ -35,7 +35,7 @@ namespace Hailstone
                     Stone stone = this._World.Pick(pos);
                     if (stone != null)
                     {
-                        Stone.Selection = new Chain(stone, this._World.Stones[1]);
+                        Stone.Selection = new Chain(stone, this._World[1]);
                     }
                     else
                     {
@@ -130,7 +130,7 @@ namespace Hailstone
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            if ((this._Cycle = (this._Cycle + 1) % 5) == 0 && this._World.Stones.Count < 200)
+            if ((this._Cycle = (this._Cycle + 1) % 30) == 0 && this._World.StoneCount < 2000)
             {
                 this._World.Insert(this._Next++);
             }
@@ -138,7 +138,7 @@ namespace Hailstone
             this.Title = String.Format("{0} ({1:#} fps)", Program.Title, this.RenderFrequency);
             this._Camera.Update(e.Time);
             this._World.Update(e.Time);
-            Stone.SelectionGlowPhase += e.Time * 4.0;
+            Stone.SelectionGlowPhase += e.Time;
         }
 
         private uint _Next;

@@ -39,7 +39,7 @@ namespace Hailstone
         /// <summary>
         /// The force per unit length applied by a link.
         /// </summary>
-        public static readonly double LinkForce = 25.0;
+        public static readonly double LinkForce = 60.0;
 
         /// <summary>
         /// The repulsion force applied by nearby stones.
@@ -102,8 +102,8 @@ namespace Hailstone
         {
             Vector dif = B.Position - A.Position;
             double len = Math.Max(dif.Length, A.Radius + B.Radius);
-            A.Impluse(dif * -RepelImpulse / (len * len * len));
-            B.Impluse(dif * RepelImpulse / (len * len * len));
+            A.Impluse(dif * (-RepelImpulse / (len * len * len)));
+            B.Impluse(dif * (RepelImpulse / (len * len * len)));
         }
 
         /// <summary>
@@ -116,15 +116,28 @@ namespace Hailstone
             {
                 Vector dif = next.Position - this.Position;
                 double len = dif.Length;
-                this.Impluse(dif * LinkImpulse * (len - Stone.LinkTargetLength));
-                next.Impluse(dif * -LinkImpulse * (len - Stone.LinkTargetLength));
+                double power = len - Stone.LinkTargetLength;
+                power = Math.Min(10.0, Math.Abs(power) * power);
+                this.Impluse(dif * (LinkImpulse * power / len));
+                next.Impluse(dif * (-LinkImpulse * power / len));
             }
 
             this.Position += this.Velocity * Time;
 
-            double speed = this.Velocity.Length;
-            double drag = Stone.DragForce * this.Radius / this.Mass;
-            if (speed > 0.001) this.Velocity *= (Math.Sqrt(1.0 + 4.0 * speed * drag * Time) - 1.0) / (2.0 * speed * drag * Time);
+            if (double.IsNaN(this.Position.X) || double.IsNaN(this.Position.Y))
+            {
+                this.Position = Vector.Zero;
+                this.Velocity = Vector.Zero;
+            }
+            else
+            {
+                double speed = this.Velocity.Length;
+                double drag = Stone.DragForce * this.Radius / this.Mass;
+                if (speed > 0.01)
+                    this.Velocity *= (Math.Sqrt(1.0 + 4.0 * speed * drag * Time) - 1.0) / (2.0 * speed * drag * Time);
+                else
+                    this.Velocity *= Math.Pow(0.5, Time);
+            }
         }
 
         /// <summary>
