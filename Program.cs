@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Hailstone
 {
@@ -9,16 +10,21 @@ namespace Hailstone
     public class Program
     {
         /// <summary>
-        /// The title for the main window of the program.
-        /// </summary>
-        public static readonly string Title = "Hailstone";
-
-        /// <summary>
         /// Program main entry-point.
         /// </summary>
         public static void Main()
         {
-            new Window().Run(60.0);
+            Application.EnableVisualStyles();
+            MainForm form = new MainForm();
+            Timer trender = new Timer();
+            trender.Interval = 15;
+            trender.Tick += delegate { form.Render(); };
+            trender.Start();
+            Timer tupdate = new Timer();
+            tupdate.Interval = 10;
+            tupdate.Tick += delegate { form.Update(0.01); };
+            tupdate.Start();
+            Application.Run(form);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Hailstone
@@ -63,7 +62,7 @@ namespace Hailstone
         /// <summary>
         /// The edge-length of a zone in a world.
         /// </summary>
-        public static readonly double ZoneSize = 10.0;
+        public static readonly double ZoneSize = 7.0;
 
         /// <summary>
         /// The sequence that defines the relationships between stones.
