@@ -5,14 +5,14 @@ using System.Text;
 namespace Hailstone
 {
     /// <summary>
-    /// A visual representation of a value in a sequence (what else am I supposed to call these things?).
+    /// A visual representation of a entry in a domain.
     /// </summary>
     public class Stone
     {
-        public Stone(uint Value)
+        public Stone(Entry Entry)
         {
-            this.Number = Value;
-            this.Radius = Math.Log10((double)Value + 100.0) * 0.25;
+            this.Entry = Entry;
+            this.Radius = Math.Log10((double)Entry.Value + 100.0) * 0.25;
         }
 
         /// <summary>
@@ -31,9 +31,9 @@ namespace Hailstone
         public static readonly double DragForce = 10.0;
 
         /// <summary>
-        /// The number this stone represents.
+        /// The entry this stone represents.
         /// </summary>
-        public readonly uint Number;
+        public readonly Entry Entry;
 
         /// <summary>
         /// The radius of this stone.

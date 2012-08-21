@@ -16,7 +16,8 @@ namespace Hailstone.UI
             InitializeComponent();
 
             this._Camera = new Camera();
-            this._World = new World(HailstoneSequence.Instance);
+            this._Domain = new Domain(x => (x % 2 == 0) ? (x / 2) : (x * 3 + 1));
+            this._World = new World(this._Domain);
         }
 
         /// <summary>
@@ -106,9 +107,9 @@ namespace Hailstone.UI
         /// </summary>
         public void Update(double Time)
         {
-            if ((this._Cycle = (this._Cycle + 1) % 3) == 0 && this._World.StoneCount < 2000)
+            if ((this._Cycle = (this._Cycle + 1) % 3) == 0 && this._World.Count < 2000)
             {
-                this._World.Insert(this._Next++);
+                this._World.Insert(this._Domain[this._Next++], Vector.Zero);
             }
 
             this._Camera.Update(Time);
@@ -140,7 +141,7 @@ namespace Hailstone.UI
                 Stone stone = this._World.Pick(pos);
                 if (stone != null)
                 {
-                    Stone.Selection = new Chain(stone, this._World[1]);
+                    Stone.Selection = new Chain(stone, this._World[this._Domain[1]]);
                 }
                 else
                 {
@@ -163,6 +164,7 @@ namespace Hailstone.UI
         private uint _Next;
         private int _Cycle;
         private Camera _Camera;
+        private Domain _Domain;
         private World _World;
     }
 }

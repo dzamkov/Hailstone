@@ -50,13 +50,14 @@ namespace Hailstone
     }
 
     /// <summary>
-    /// An organized collection of stones.
+    /// A visual representation for a subset of a domain, with stones representing entries.
     /// </summary>
     public class World
     {
-        public World(Sequence Sequence)
+        public World(Domain Domain)
         {
-            this.Sequence = Sequence;
+            this.Domain = Domain;
+            this._Stones = new Dictionary<Entry, Stone>();
         }
 
         /// <summary>
@@ -65,19 +66,19 @@ namespace Hailstone
         public static readonly double ZoneSize = 7.0;
 
         /// <summary>
-        /// The sequence that defines the relationships between stones.
+        /// Gets the domain this world is associated with.
         /// </summary>
-        public readonly Sequence Sequence;
+        public readonly Domain Domain;
 
         /// <summary>
-        /// Gets a stone with the given number, or null if it is not in the world.
+        /// Gets the stone for the given entry, or null if it is not in the world.
         /// </summary>
-        public Stone this[uint Number]
+        public Stone this[Entry Entry]
         {
             get
             {
                 Stone stone;
-                this._Stones.TryGetValue(Number, out stone);
+                this._Stones.TryGetValue(Entry, out stone);
                 return stone;
             }
         }
@@ -85,7 +86,7 @@ namespace Hailstone
         /// <summary>
         /// Gets the amount of stones in this world.
         /// </summary>
-        public int StoneCount
+        public int Count
         {
             get
             {
@@ -94,63 +95,51 @@ namespace Hailstone
         }
 
         /// <summary>
-        /// Tries inserting a stone for the given number into this world. If one already exists, it will be
-        /// returned.
+        /// Tries inserting a stone for the given entry at the given position. If one already exists, it will
+        /// be returned.
         /// </summary>
-        public Stone Insert(uint Number)
+        public Stone Insert(Entry Entry, Vector Position)
         {
             Stone stone;
-            if (this._Stones.TryGetValue(Number, out stone)) return stone;
-            this._Stones[Number] = stone = new Stone(Number);
-            int influences = 0;
-
-            List<Stone> unlinked;
-            if (this._Unlinked.TryGetValue(Number, out unlinked))
+            if (!this._Stones.TryGetValue(Entry, out stone))
             {
-                influences += unlinked.Count;
-                foreach (Stone s in unlinked)
-                {
-                    stone.Position += s.Position;
-                    s.Next = stone;
-                }
-                this._Unlinked.Remove(Number);
+                stone = new Stone(Entry);
+                stone.Position = Position;
+                _Tweak(stone, ref stone.Velocity);
+                this._Link(stone, Entry);
             }
-
-            uint next = this.Sequence.Next(Number);
-            Stone nexts;
-            if (this._Stones.TryGetValue(next, out nexts))
-            {
-                stone.Position += nexts.Position;
-                stone.Next = nexts;
-                influences++;
-            }
-            else
-            {
-                if (Number == next)
-                    stone.Next = stone;
-                else
-                {
-                    if (!this._Unlinked.TryGetValue(next, out unlinked))
-                        this._Unlinked[next] = unlinked = new List<Stone>();
-                    unlinked.Add(stone);
-                }
-            }
-
-            if (influences > 0)
-            {
-                stone.Position /= (double)influences;
-                stone.Velocity /= (double)influences;
-                stone.Position *= 1.00001;
-                stone.Velocity *= 1.3;
-            }
-            else
-            {
-                double phase = Math.Sqrt((double)Number * 10.0);
-                stone.Position = new Vector(Math.Cos(phase), Math.Sin(phase)) * phase;
-            }
-
-            this._Insert(stone, _GetZone(stone.Position));
             return stone;
+        }
+
+        /// <summary>
+        /// Changes a vector slightly to make it distinct from other vectors.
+        /// </summary>
+        private static void _Tweak(object Object, ref Vector Vector)
+        {
+            int h = Object.GetHashCode();
+            int x = h & 0xFF;
+            int y = (h & 0xFF00) >> 8;
+            Vector.X += (x - 127.0) * 0.000001;
+            Vector.Y += (y - 127.0) * 0.000001;
+        }
+
+        /// <summary>
+        /// Links up a newly-introduced stone.
+        /// </summary>
+        private void _Link(Stone Stone, Entry Entry)
+        {
+            foreach (Entry p in Entry.Previous)
+            {
+                Stone prev;
+                if (this._Stones.TryGetValue(p, out prev))
+                    prev.Next = Stone;
+            }
+            Entry n = Entry.Next;
+            Stone next;
+            if (n != null && this._Stones.TryGetValue(n, out next))
+                Stone.Next = next;
+            this._Stones[Entry] = Stone;
+            this._Insert(Stone, _GetZone(Stone.Position));
         }
 
         /// <summary>
@@ -195,7 +184,7 @@ namespace Hailstone
                 {
                     foreach (Stone b in zone)
                     {
-                        if (a != b && a.Number > b.Number)
+                        if (a != b && a.GetHashCode() > b.GetHashCode())
                         {
                             Stone.Interact(a, b, repelimpulse);
                         }
@@ -280,7 +269,6 @@ namespace Hailstone
         }
 
         private Dictionary<ZoneIndex, List<Stone>> _Zones = new Dictionary<ZoneIndex, List<Stone>>();
-        private Dictionary<uint, Stone> _Stones = new Dictionary<uint, Stone>();
-        private Dictionary<uint, List<Stone>> _Unlinked = new Dictionary<uint, List<Stone>>();
+        private Dictionary<Entry, Stone> _Stones = new Dictionary<Entry, Stone>();
     }
 }

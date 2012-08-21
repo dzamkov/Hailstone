@@ -219,7 +219,7 @@ namespace Hailstone
                     }
                 }
                 Atlas.DrawCircle(Render, bordercolor, Stone.Position, Stone.Radius);
-                Atlas.DrawNumber(Render, Stone.Number, Settings.Current.StoneNumberColor, Stone.Position, numbersize, numbersize * 0.8);
+                Atlas.DrawNumber(Render, Stone.Entry.Value, Settings.Current.StoneNumberColor, Stone.Position, numbersize, numbersize * 0.8);
             }
         }
 
