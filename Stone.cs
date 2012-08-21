@@ -16,26 +16,6 @@ namespace Hailstone
         }
 
         /// <summary>
-        /// The size of the numbers on a stone.
-        /// </summary>
-        public static readonly double NumberSize = 0.3;
-
-        /// <summary>
-        /// The width of the links between stones.
-        /// </summary>
-        public static readonly double LinkWidth = 0.07;
-
-        /// <summary>
-        /// The minimum length between stones before an arrow link appears.
-        /// </summary>
-        public static readonly double LinkArrowLength = 0.8;
-
-        /// <summary>
-        /// The target length for a link.
-        /// </summary>
-        public static readonly double LinkTargetLength = 1.7;
-
-        /// <summary>
         /// The force per unit length applied by a link.
         /// </summary>
         public static readonly double LinkForce = 60.0;
@@ -115,7 +95,7 @@ namespace Hailstone
             {
                 Vector dif = next.Position - this.Position;
                 double len = dif.Length;
-                double power = len - Stone.LinkTargetLength;
+                double power = len - Settings.Current.LinkTargetLength;
                 power = Math.Min(10.0, Math.Abs(power) * power);
                 this.Impluse(dif * (LinkImpulse * power / len));
                 next.Impluse(dif * (-LinkImpulse * power / len));
@@ -172,9 +152,9 @@ namespace Hailstone
         }
 
         /// <summary>
-        /// The current glow phase (in radians) for the selected stones.
+        /// The current pulse phase (in radians) for the selected stones.
         /// </summary>
-        public static double SelectionGlowPhase = 0.0;
+        public static double SelectionPulsePhase = 0.0;
 
         /// <summary>
         /// Gets the selection index for the given stone.

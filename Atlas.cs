@@ -166,32 +166,38 @@ namespace Hailstone
         /// </summary>
         public static void DrawStone(Render Render, Stone Stone, double Extent)
         {
-            Color4 fillcolor = new Color4(0.4f, 0.7f, 1.0f, 1.0f);
-            Color4 bordercolor = new Color4(0.9f, 1.0f, 0.9f, 1.0f);
-            Color4 linecolor = bordercolor;
-            Color4 textcolor = new Color4(0.9f, 1.0f, 1.0f, 1.0f);
-
+            Color4 fillcolor;
+            Color4 bordercolor;
+            Color4 linecolor;
+            Color4 highlightcolor;
+            double numbersize = Settings.Current.StoneNumberSize;
             uint selection = Stone.GetSelectionIndex(Stone);
             if (selection != uint.MaxValue)
             {
                 selection = (uint)Stone.Selection.Length - selection;
+                float glow = (float)Math.Sin((Stone.SelectionPulsePhase + selection / Settings.Current.StonePulseLength) * Math.PI * 2.0) * 0.5f + 0.5f;
 
-                float glow = (float)Math.Sin(Stone.SelectionGlowPhase + selection * 0.3) * 0.5f + 0.5f;
-                bordercolor = new Color4(1.0f, 0.5f + glow * 0.5f, 0.4f + glow * 0.5f, 1.0f);
-                fillcolor = new Color4(0.8f + glow * 0.1f, 0.4f + glow * 0.2f, 0.4f + glow * 0.2f, 1.0f);
-                if (selection != 0)
-                    linecolor = bordercolor;
+                fillcolor = Settings.Current.StoneFillColor.GetSelected(glow);
+                bordercolor = Settings.Current.StoneBorderColor.GetSelected(glow);
+                highlightcolor = Settings.Current.StoneHighlightColor.GetSelected(glow);
+                linecolor = (selection != 0) ? bordercolor : Settings.Current.StoneBorderColor.GetUnselected();
                 if (selection != 0 && Stone.Next != null && Stone.Next != Stone)
                 {
                     Vector markerpos = Stone.Position + (Stone.Next.Position - Stone.Position).Normal.Cross * (Stone.Radius + 0.5);
-                    Atlas.DrawNumber(Render, selection, new Color4(1.0f, 0.4f, 0.4f, 0.7f), markerpos, Stone.NumberSize, Stone.NumberSize);
+                    Atlas.DrawNumber(Render, selection, new Color4(1.0f, 0.4f, 0.4f, 0.7f), markerpos, numbersize, numbersize);
                 }
             }
-            
-            float light = (float)Math.Max(0.0, Math.Min(1.0, (Extent - 50.0) / 100.0));
+            else
+            {
+                fillcolor = Settings.Current.StoneFillColor.GetUnselected();
+                bordercolor = Settings.Current.StoneBorderColor.GetUnselected();
+                highlightcolor = Settings.Current.StoneHighlightColor.GetUnselected();
+                linecolor = bordercolor;
+            }
+
             double size = Math.Max(1.0, Extent * 0.01);
-            fillcolor.R += light * 0.5f;
-            fillcolor.G += light * 0.3f;
+            float light = (float)Math.Max(0.0, Math.Min(1.0, (Extent - 50.0) / 100.0));
+            fillcolor = fillcolor.Mix(light, highlightcolor);
             Atlas.DrawFilledCircle(Render, fillcolor, Stone.Position, Stone.Radius * size);
 
             if (Extent < 120.0)
@@ -205,14 +211,15 @@ namespace Hailstone
                     double linklen = len - Stone.Radius - Stone.Next.Radius;
                     if (linklen > 0.0)
                     {
-                        if (linklen >= Stone.LinkArrowLength)
-                            Atlas.DrawArrow(Render, linecolor, start, dir, linklen, Stone.LinkWidth);
+                        double linkwidth = Settings.Current.LinkWidth;
+                        if (linklen >= Settings.Current.LinkMinimumArrowLength)
+                            Atlas.DrawArrow(Render, linecolor, start, dir, linklen, linkwidth);
                         else
-                            Atlas.DrawLine(Render, linecolor, start, dir, linklen, Stone.LinkWidth);
+                            Atlas.DrawLine(Render, linecolor, start, dir, linklen, linkwidth);
                     }
                 }
                 Atlas.DrawCircle(Render, bordercolor, Stone.Position, Stone.Radius);
-                Atlas.DrawNumber(Render, Stone.Number, textcolor, Stone.Position, Stone.NumberSize, Stone.NumberSize * 0.8);
+                Atlas.DrawNumber(Render, Stone.Number, Settings.Current.StoneNumberColor, Stone.Position, numbersize, numbersize * 0.8);
             }
         }
 

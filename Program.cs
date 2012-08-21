@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
+using Hailstone.UI;
+
 namespace Hailstone
 {
     /// <summary>

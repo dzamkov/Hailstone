@@ -9,21 +9,6 @@ namespace Hailstone
     public class Camera
     {
         /// <summary>
-        /// The damping factor applied to velocity, per second.
-        /// </summary>
-        public double Damping = 0.01;
-
-        /// <summary>
-        /// The damping factor applied to zoom velocity, per second.
-        /// </summary>
-        public double ZoomDamping = 0.01;
-
-        /// <summary>
-        /// The lateral movement factor while zooming.
-        /// </summary>
-        public double Movement = 0.95;
-
-        /// <summary>
         /// The point at the center of the camera view.
         /// </summary>
         public Vector Center = Vector.Zero;
@@ -37,16 +22,6 @@ namespace Hailstone
         /// The zoom level of the camera.
         /// </summary>
         public double Zoom = 0.0;
-
-        /// <summary>
-        /// The minimum zoom level of the camera.
-        /// </summary>
-        public double MinZoom = -10.0;
-
-        /// <summary>
-        /// The maximum zoom level of the camera.
-        /// </summary>
-        public double MaxZoom = 0.0;
 
         /// <summary>
         /// The change in zoom level, per second.
@@ -83,17 +58,19 @@ namespace Hailstone
         {
             double extent = this.Extent;
             this.Center += this.Velocity * (extent * Time);
-            this.Velocity *= Math.Pow(this.Damping, Time);
+            this.Velocity *= Math.Pow(Settings.Current.CameraMovementDamping, Time);
             this.Zoom += this.ZoomVelocity * Time;
-            this.ZoomVelocity *= Math.Pow(this.ZoomDamping, Time);
-            if (this.Zoom < this.MinZoom)
+            this.ZoomVelocity *= Math.Pow(Settings.Current.CameraZoomDamping, Time);
+            double minzoom = Settings.Current.CameraMinZoom;
+            if (this.Zoom < minzoom)
             {
-                this.Zoom = this.MinZoom;
+                this.Zoom = minzoom;
                 this.ZoomVelocity = 0.0;
             }
-            if (this.Zoom > this.MaxZoom)
+            double maxzoom = Settings.Current.CameraMaxZoom;
+            if (this.Zoom > maxzoom)
             {
-                this.Zoom = this.MaxZoom;
+                this.Zoom = maxzoom;
                 this.ZoomVelocity = 0.0;
             }
         }
@@ -103,10 +80,11 @@ namespace Hailstone
         /// </summary>
         public void ZoomTo(double Amount, Vector Target)
         {
+            Amount *= Settings.Current.CameraZoomSpeed;
             double extent = this.Extent;
             Vector dif = Target - this.Center;
             this.ZoomVelocity += Amount;
-            this.Velocity += dif * (Amount * this.Movement / extent);
+            this.Velocity += dif * (Amount * Settings.Current.CameraZoomMovement / extent);
         }
     }
 }

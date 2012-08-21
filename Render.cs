@@ -229,4 +229,24 @@ namespace Hailstone
             Render.Vertex(Destination.TopRight * Scale + Offset, Source.TopRight, Color);
         }
     }
+
+    /// <summary>
+    /// Defines additional operations on color4.
+    /// </summary>
+    public static class Color4Extensions
+    {
+        /// <summary>
+        /// Mixes this color with another by the given factor.
+        /// </summary>
+        public static Color4 Mix(this Color4 Source, float Factor, Color4 Other)
+        {
+            float af = 1.0f - Factor;
+            float bf = Factor;
+            float na = af * Source.A + bf * Other.A;
+            float nr = (af * Source.A * Source.R + bf * Other.A * Other.R) / na;
+            float ng = (af * Source.A * Source.G + bf * Other.A * Other.G) / na;
+            float nb = (af * Source.A * Source.B + bf * Other.A * Other.B) / na;
+            return new Color4(nr, ng, nb, na);
+        }
+    }
 }
