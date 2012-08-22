@@ -353,7 +353,7 @@ namespace Hailstone
                             {
                                 Vector dif = Stone.Position - other.Position;
                                 double len = Math.Max(dif.Length, other.Radius);
-                                double mag = other.Mass / (len * len);
+                                double mag = 1.0 / (len * len);
                                 Vector force = dif * (mag / len);
                                 Direction += force;
                                 pressure += mag;

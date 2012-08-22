@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.ComponentModel;
+using System.Xml.Serialization;
+using System.IO;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -17,7 +19,72 @@ namespace Hailstone
         /// <summary>
         /// The current program settings.
         /// </summary>
-        public static Settings Current = Settings.Default;
+        public static Settings Current;
+
+        /// <summary>
+        /// The serializer for a settings object.
+        /// </summary>
+        public static XmlSerializer Serializer = new XmlSerializer(typeof(Settings));
+
+        /// <summary>
+        /// The available settings indexed by name.
+        /// </summary>
+        public static readonly Dictionary<string, Func<Settings>> Options = new Dictionary<string, Func<Settings>>();
+
+        /// <summary>
+        /// Saves the a settings object with the given name.
+        /// </summary>
+        public static void Save(Settings Settings, string Name)
+        {
+            string path = "Settings\\" + Name + ".config";
+            using (FileStream stream = File.OpenWrite(path))
+                Serializer.Serialize(stream, Settings);
+            Options[Name] = _Load(path);
+        }
+
+        /// <summary>
+        /// Tries loading a settings object with the given name.
+        /// </summary>
+        public static Settings Load(string Name)
+        {
+            return Options[Name]();
+        }
+
+        /// <summary>
+        /// Creates a function to load a settings file from a path.
+        /// </summary>
+        private static Func<Settings> _Load(string Path)
+        {
+            return delegate
+            {
+                using (FileStream stream = File.OpenRead(Path))
+                    return (Settings)Serializer.Deserialize(stream);
+            };
+        }
+
+        /// <summary>
+        /// Updates the set of available settings.
+        /// </summary>
+        public static void UpdateOptions()
+        {
+            Options["Default"] = delegate { return Settings.Default; };
+            if (!Directory.Exists("Settings"))
+            {
+                Directory.CreateDirectory("Settings");
+            }
+            else
+            {
+                foreach (string file in Directory.GetFiles("Settings"))
+                    if (Path.GetExtension(file) == ".config")
+                        Options[Path.GetFileNameWithoutExtension(file)] = _Load(file);
+            }
+        }
+
+        static Settings()
+        {
+            UpdateOptions();
+            Load("Default");
+        }
 
         /// <summary>
         /// Gets the default program settings.
@@ -36,6 +103,8 @@ namespace Hailstone
                     CameraZoomSpeed = 1.0,
 
                     StoneDamping = 0.1,
+                    StoneLinkForce = 10.0,
+                    StoneRepelForce = 30.0,
                     StoneNumberSize = 0.3,
                     StoneNumberColor = new Color(0.9, 1.0, 1.0, 1.0),
                     StoneFillColor = new ExtendedColor
@@ -61,7 +130,7 @@ namespace Hailstone
 
                     StoneIntroductionPressureThreshold = 0.5,
                     StoneIntroductionPressureExpansion = 1.05,
-                    StoneIntroductionTimeout = 5.0,
+                    StoneIntroductionTimeout = 10.0,
                     StoneIntroductionSpeed = 0.1,
 
                     LinkWidth = 0.07,
@@ -107,6 +176,16 @@ namespace Hailstone
         [DisplayName("Movement Damping")]
         [Description("The damping factor applied to stone movement")]
         public double StoneDamping { get; set; }
+
+        [Category("Stone")]
+        [DisplayName("Link Force")]
+        [Description("The amount of force applied to keep a stone's link at the target length")]
+        public double StoneLinkForce { get; set; }
+
+        [Category("Stone")]
+        [DisplayName("Repel Force")]
+        [Description("The amount of force applied to keep stones away from each other")]
+        public double StoneRepelForce { get; set; }
 
         [Category("Stone")]
         [DisplayName("Number Size")]
@@ -218,7 +297,7 @@ namespace Hailstone
                 return String.Format("Color", this.R, this.G, this.B, this.A);
             }
 
-            public static implicit operator Color4(Color Source)
+            public static explicit operator Color4(Color Source)
             {
                 return new Color4((float)Source.R, (float)Source.G, (float)Source.B, (float)Source.A);
             }
@@ -249,7 +328,7 @@ namespace Hailstone
             /// </summary>
             public Color4 GetUnselected()
             {
-                return this.Normal;
+                return (Color4)this.Normal;
             }
 
             /// <summary>
@@ -257,7 +336,7 @@ namespace Hailstone
             /// </summary>
             public Color4 GetSelected(float Glow)
             {
-                return ((Color4)this.Selected).Mix(Glow, this.Glow);
+                return ((Color4)this.Selected).Mix(Glow, (Color4)this.Glow);
             }
         }
     }

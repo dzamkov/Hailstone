@@ -13,18 +13,7 @@ namespace Hailstone
         {
             this.Entry = Entry;
             this.Radius = Math.Log10((double)Entry.Value + 100.0) * 0.25;
-            this.Mass = this.Radius;
         }
-
-        /// <summary>
-        /// The force per unit length applied by a link.
-        /// </summary>
-        public static readonly double LinkForce = 20.0;
-
-        /// <summary>
-        /// The repulsion force applied by nearby stones.
-        /// </summary>
-        public static readonly double RepelForce = 30.0;
 
         /// <summary>
         /// The entry this stone represents.
@@ -35,12 +24,6 @@ namespace Hailstone
         /// The radius of this stone.
         /// </summary>
         public double Radius;
-
-        /// <summary>
-        /// The mass of this stone. Note that mass represents repulsive force, rather than 
-        /// resistance to changes in velocity.
-        /// </summary>
-        public double Mass;
 
         /// <summary>
         /// The position of this stone in world-space.
@@ -75,7 +58,7 @@ namespace Hailstone
         {
             Vector dif = B.Position - A.Position;
             double len = Math.Max(dif.Length, A.Radius + B.Radius);
-            Vector force = dif * (Time * RepelForce * A.Mass * B.Mass / (len * len * len));
+            Vector force = dif * (Time * Settings.Current.StoneRepelForce / (len * len * len));
             A.Velocity -= force;
             B.Velocity += force;
         }
@@ -92,7 +75,7 @@ namespace Hailstone
                 double len = dif.Length;
                 double power = len - this.TargetLinkLength;
                 power = Math.Min(10.0, Math.Abs(power) * power);
-                Vector force = dif * (Time * LinkForce * power / len);
+                Vector force = dif * (Time * Settings.Current.StoneLinkForce * power / len);
                 this.Velocity += force;
                 next.Velocity -= force;
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Hailstone.UI
 {
@@ -23,7 +24,18 @@ namespace Hailstone.UI
         /// </summary>
         public static new void Show()
         {
+            Settings.UpdateOptions();
             ((Form)Instance).Show();
+        }
+
+        private void _SaveButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void _LoadButton_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
