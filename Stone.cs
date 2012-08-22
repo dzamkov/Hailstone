@@ -13,6 +13,7 @@ namespace Hailstone
         {
             this.Entry = Entry;
             this.Radius = Math.Log10((double)Entry.Value + 100.0) * 0.25;
+            this.Mass = this.Radius;
         }
 
         /// <summary>
@@ -26,11 +27,6 @@ namespace Hailstone
         public static readonly double RepelForce = 30.0;
 
         /// <summary>
-        /// The drag force for stones.
-        /// </summary>
-        public static readonly double DragForce = 1.0;
-
-        /// <summary>
         /// The entry this stone represents.
         /// </summary>
         public readonly Entry Entry;
@@ -38,18 +34,13 @@ namespace Hailstone
         /// <summary>
         /// The radius of this stone.
         /// </summary>
-        public readonly double Radius;
+        public double Radius;
 
         /// <summary>
-        /// Gets the mass of this stone.
+        /// The mass of this stone. Note that mass represents repulsive force, rather than 
+        /// resistance to changes in velocity.
         /// </summary>
-        public double Mass
-        {
-            get
-            {
-                return this.Radius;
-            }
-        }
+        public double Mass;
 
         /// <summary>
         /// The position of this stone in world-space.
@@ -65,40 +56,45 @@ namespace Hailstone
         /// The next stone after this one in the sequence, or null if does not exist.
         /// </summary>
         public Stone Next;
-
+        
         /// <summary>
-        /// Applies an impulse to this stone.
+        /// Gets the target link length for this stone.
         /// </summary>
-        public void Impluse(Vector Impulse)
+        public double TargetLinkLength
         {
-            this.Velocity += Impulse * (1.0 / this.Mass);
+            get
+            {
+                return this.Radius * Settings.Current.LinkTargetLength;
+            }
         }
 
         /// <summary>
         /// Handles the interaction between two unique stones.
         /// </summary>
-        public static void Interact(Stone A, Stone B, double RepelImpulse)
+        public static void Interact(Stone A, Stone B, double Time)
         {
             Vector dif = B.Position - A.Position;
             double len = Math.Max(dif.Length, A.Radius + B.Radius);
-            A.Impluse(dif * (-RepelImpulse / (len * len * len)));
-            B.Impluse(dif * (RepelImpulse / (len * len * len)));
+            Vector force = dif * (Time * RepelForce * A.Mass * B.Mass / (len * len * len));
+            A.Velocity -= force;
+            B.Velocity += force;
         }
 
         /// <summary>
         /// Updates a stone.
         /// </summary>
-        public void Update(double LinkImpulse, double Time)
+        public void Update(double Time, double Damping)
         {
             Stone next = this.Next;
             if (next != null && this != next)
             {
                 Vector dif = next.Position - this.Position;
                 double len = dif.Length;
-                double power = len - Settings.Current.LinkTargetLength;
+                double power = len - this.TargetLinkLength;
                 power = Math.Min(10.0, Math.Abs(power) * power);
-                this.Impluse(dif * (LinkImpulse * power / len));
-                next.Impluse(dif * (-LinkImpulse * power / len));
+                Vector force = dif * (Time * LinkForce * power / len);
+                this.Velocity += force;
+                next.Velocity -= force;
             }
 
             this.Position += this.Velocity * Time;
@@ -110,12 +106,7 @@ namespace Hailstone
             }
             else
             {
-                double speed = this.Velocity.Length;
-                double drag = Stone.DragForce * this.Radius / this.Mass;
-                if (speed > 0.01)
-                    this.Velocity *= (Math.Sqrt(1.0 + 4.0 * speed * drag * Time) - 1.0) / (2.0 * speed * drag * Time);
-                else
-                    this.Velocity *= Math.Pow(0.5, Time);
+                this.Velocity *= Damping;
             }
         }
 

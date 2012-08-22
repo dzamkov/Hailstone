@@ -84,6 +84,30 @@ namespace Hailstone
         }
 
         /// <summary>
+        /// Tries to get a stone for the given entry. Returns false if none exists in this world.
+        /// </summary>
+        public bool TryGetStone(Entry Entry, out Stone Stone)
+        {
+            return this._Stones.TryGetValue(Entry, out Stone);
+        }
+
+        /// <summary>
+        /// Determines whether this world contains a stone for the given entry.
+        /// </summary>
+        public bool ContainsEntry(Entry Entry)
+        {
+            return this._Stones.ContainsKey(Entry);
+        }
+
+        /// <summary>
+        /// Determines whether this world contains the given stone.
+        /// </summary>
+        public bool ContainsStone(Stone Stone)
+        {
+            return this._Stones.ContainsValue(Stone);
+        }
+
+        /// <summary>
         /// Gets the amount of stones in this world.
         /// </summary>
         public int Count
@@ -131,53 +155,26 @@ namespace Hailstone
                 Stone.Next = next;
             this._Stones[Entry] = Stone;
             this._Insert(Stone, _GetZone(Stone.Position));
+            this.MakeLeader(Stone);
         }
 
         /// <summary>
-        /// Tries to get a stone for the given entry. Returns false if none exists in this world.
+        /// Updates the set of leader stones in response to a change in the associated domain.
         /// </summary>
-        public bool TryGetStone(Entry Entry, out Stone Stone)
+        public void UpdateLeaders()
         {
-            return this._Stones.TryGetValue(Entry, out Stone);
+            foreach (Stone stone in this._Stones.Values)
+                this.MakeLeader(stone);
         }
 
         /// <summary>
-        /// Indicates whether the given entry can be introduce, if there is at least one stone in the world it
-        /// can immediately link to. If so, the position and velocity of the stone to be introduced are returned.
+        /// Makes the given stone in this world a leader stone, allowing it to admit new stones for
+        /// adjacent entries in the associated domain.
         /// </summary>
-        public bool CanIntroduce(Entry Entry, out Vector Position, out Vector Velocity)
+        public void MakeLeader(Stone Stone)
         {
-            Position = Vector.Zero;
-            Velocity = Vector.Zero;
-            int influences = 0;
-            foreach (Entry p in Entry.Previous)
-            {
-                Stone prev;
-                if (this._Stones.TryGetValue(p, out prev))
-                {
-                    Position += prev.Position;
-                    Velocity += prev.Velocity;
-                    influences++;
-                }
-            }
-            Entry n = Entry.Next;
-            Stone next;
-            if (n != null && this._Stones.TryGetValue(n, out next))
-            {
-                Position += next.Position;
-                Velocity += next.Velocity;
-                influences++;
-            }
-
-            if (influences > 0)
-            {
-                _Tweak(Entry, ref Position);
-                Position /= influences;
-                Velocity /= influences;
-                return true;
-            }
-            else
-                return false;
+            _Leader leader = new _Leader();
+            if (leader.Reset(this, Stone)) this._Leaders.Add(Stone, leader);
         }
 
         /// <summary>
@@ -208,14 +205,14 @@ namespace Hailstone
         /// <summary>
         /// Allows a stone to interact with all other stones in the zone with the given index.
         /// </summary>
-        private void _Interact(Stone Stone, ZoneIndex Index, double RepelImpulse)
+        private void _Interact(Stone Stone, ZoneIndex Index, double Time)
         {
             List<Stone> zone;
             if (this._Zones.TryGetValue(Index, out zone))
             {
                 foreach (Stone other in zone)
                 {
-                    Stone.Interact(Stone, other, RepelImpulse);
+                    Stone.Interact(Stone, other, Time);
                 }
             }
         }
@@ -225,7 +222,6 @@ namespace Hailstone
         /// </summary>
         public void Update(double Time)
         {
-            double repelimpulse = Stone.RepelForce * Time;
             foreach (var kvp in this._Zones)
             {
                 ZoneIndex index = kvp.Key;
@@ -236,25 +232,25 @@ namespace Hailstone
                     {
                         if (a != b && a.GetHashCode() > b.GetHashCode())
                         {
-                            Stone.Interact(a, b, repelimpulse);
+                            Stone.Interact(a, b, Time);
                         }
                     }
-                    this._Interact(a, new ZoneIndex(index.X + 1, index.Y), repelimpulse);
-                    this._Interact(a, new ZoneIndex(index.X + 1, index.Y + 1), repelimpulse);
-                    this._Interact(a, new ZoneIndex(index.X, index.Y + 1), repelimpulse);
-                    this._Interact(a, new ZoneIndex(index.X - 1, index.Y), repelimpulse);
+                    this._Interact(a, new ZoneIndex(index.X + 1, index.Y), Time);
+                    this._Interact(a, new ZoneIndex(index.X + 1, index.Y + 1), Time);
+                    this._Interact(a, new ZoneIndex(index.X, index.Y + 1), Time);
+                    this._Interact(a, new ZoneIndex(index.X - 1, index.Y), Time);
                 }
             }
 
             List<Action> changes = new List<Action>();
-            double linkimpulse = Stone.LinkForce * Time;
+            double damping = Math.Pow(Settings.Current.StoneDamping, Time);
             foreach (var kvp in this._Zones)
             {
                 ZoneIndex index = kvp.Key;
                 List<Stone> zone = kvp.Value;
                 foreach (Stone stone in zone)
                 {
-                    stone.Update(linkimpulse, Time);
+                    stone.Update(Time, damping);
                     ZoneIndex nextindex = _GetZone(stone.Position);
                     if (nextindex != index) 
                     {
@@ -270,6 +266,24 @@ namespace Hailstone
                     }
                 }
             }
+            
+            double pressuredamping = Math.Pow(Settings.Current.StoneIntroductionPressureExpansion, Time);
+            foreach (var kvp in this._Leaders)
+            {
+                Stone s = kvp.Key;
+                _Leader l = kvp.Value;
+                Stone i;
+                if (l.Update(this, s, Time, pressuredamping, out i))
+                {
+                    if (!l.Reset(this, s)) changes.Add(delegate { this._Leaders.Remove(s); });
+                    if (i != null) changes.Add(delegate { this.Insert(i); });
+                }
+                else
+                {
+                    if (l.Timeout <= 0.0) changes.Add(delegate { this._Leaders.Remove(s); });
+                }
+            }
+
             foreach (Action change in changes)
             {
                 change();
@@ -318,79 +332,122 @@ namespace Hailstone
             if (Zone.Count == 0) this._Zones.Remove(Index);
         }
 
-        private Dictionary<ZoneIndex, List<Stone>> _Zones = new Dictionary<ZoneIndex, List<Stone>>();
-        private Dictionary<Entry, Stone> _Stones = new Dictionary<Entry, Stone>();
-    }
-
-    /// <summary>
-    /// Contains the entries to be introduced into a world automatically over a period of time.
-    /// </summary>
-    public class Wave
-    {
-        public Wave(IEnumerable<Entry> Entries)
+        /// <summary>
+        /// Gets the repulsive pressure felt by the given stone.
+        /// </summary>
+        private double _Pressure(Stone Stone, out Vector Direction)
         {
-            this.Entries = new HashSet<Entry>(Entries);
-            this.Delay = 0.0;
+            double pressure = 0.0;
+            Direction = Vector.Zero;
+            ZoneIndex centerindex = _GetZone(Stone.Position);
+            for (int x = centerindex.X - 1; x <= centerindex.X + 1; x++)
+                for (int y = centerindex.Y - 1; y <= centerindex.Y + 1; y++)
+                {
+                    List<Stone> zone;
+                    if (this._Zones.TryGetValue(new ZoneIndex(x, y), out zone))
+                        foreach (Stone other in zone)
+                            if (other != Stone)
+                            {
+                                Vector dif = Stone.Position - other.Position;
+                                double len = Math.Max(dif.Length, other.Radius);
+                                double mag = other.Mass / (len * len);
+                                Vector force = dif * (mag / len);
+                                Direction += force;
+                                pressure += mag;
+                            }
+                }
+            return pressure;
         }
 
         /// <summary>
-        /// The entries to be introduced in this wave.
+        /// Contains information about a leader stone, a stone that will introduce new entries.
         /// </summary>
-        public readonly HashSet<Entry> Entries;
-
-        /// <summary>
-        /// The delay until the next entry gets introduced.
-        /// </summary>
-        public double Delay;
-
-        /// <summary>
-        /// Updates this wave, introducing entries as needed. Returns false when the wave is finished.
-        /// </summary>
-        public bool Update(World World, double Time)
+        private class _Leader
         {
-            this.Delay -= Time;
-            if (this.Delay < 0.0)
+            /// <summary>
+            /// The maximum pressure for the leader stone before the next stone is introduced. This will
+            /// decrease over time to insure the new stone will be admitted eventually.
+            /// </summary>
+            public double PressureThreshold;
+
+            /// <summary>
+            /// The idle time before this leader is discarded.
+            /// </summary>
+            public double Timeout;
+
+            /// <summary>
+            /// The next entry to be introduced by this leader.
+            /// </summary>
+            public Entry Next;
+
+            /// <summary>
+            /// Prepares this leader for the next entry. Returns false if there are no entries left to introduce.
+            /// </summary>
+            public bool Reset(World World, Stone Stone)
             {
-                if (this.TryIntroduce(World))
+                this.PressureThreshold = Settings.Current.StoneIntroductionPressureThreshold;
+                this.Timeout = Settings.Current.StoneIntroductionTimeout;
+                this.Next = GetNext(World, Stone);
+                return this.Next != null;
+            }
+
+            /// <summary>
+            /// Updates this leader state by the given amount of time. Returns true if a new stone was introduced.
+            /// </summary>
+            public bool Update(World World, Stone Stone, double Time, double Expansion, out Stone Introduced)
+            {
+                Vector dir;
+                if (World._Pressure(Stone, out dir) < this.PressureThreshold)
                 {
-                    this.Delay = Settings.Current.StoneIntroductionDelay;
+                    if (World.ContainsEntry(this.Next))
+                    {
+                        this.Next = GetNext(World, Stone);
+                        if (this.Next == null)
+                        {
+                            Introduced = null;
+                            return true;
+                        }
+                    }
+
+                    Introduced = new Stone(this.Next);
+                    Introduced.Position = Stone.Position;
+                    double dirlen = dir.Length;
+                    if (dirlen > 0.001)
+                    {
+                        dir = dir.Normal;
+                        Introduced.Velocity = Stone.Velocity + dir * Settings.Current.StoneIntroductionSpeed;
+                        Introduced.Position += dir * Stone.Radius;
+                    }
+                    _Tweak(this.Next, ref Introduced.Position);
                     return true;
                 }
                 else
                 {
-                    this.Entries.Clear();
+                    this.PressureThreshold *= Expansion;
+                    this.Timeout -= Time;
+                    Introduced = null;
                     return false;
                 }
             }
-            return true;
+
+            /// <summary>
+            /// Gets the next entry to be introduced by the given stone, or null if there are none left.
+            /// </summary>
+            public static Entry GetNext(World World, Stone Stone)
+            {
+                Entry entry = Stone.Entry;
+                Entry n = entry.Next;
+                if (n != null && !World.ContainsEntry(n))
+                    return n;
+                foreach (Entry p in entry.Previous)
+                    if (!World.ContainsEntry(p))
+                        return p;
+                return null;
+            }
         }
 
-        /// <summary>
-        /// Tries to introduce as many entries in the wave as possible to the given world.
-        /// </summary>
-        public bool TryIntroduce(World World)
-        {
-            List<Stone> entrants = new List<Stone>();
-            Vector position, velocity;
-            foreach (Entry entry in this.Entries)
-            {
-                if (World[entry] == null)
-                {
-                    if (World.CanIntroduce(entry, out position, out velocity))
-                    {
-                        Stone stone = new Stone(entry);
-                        stone.Position = position;
-                        stone.Velocity = velocity;
-                        entrants.Add(stone);
-                    }
-                }
-            }
-            foreach (Stone entrant in entrants)
-            {
-                this.Entries.Remove(entrant.Entry);
-                World.Insert(entrant);
-            }
-            return entrants.Count > 0;
-        }
+        private Dictionary<ZoneIndex, List<Stone>> _Zones = new Dictionary<ZoneIndex, List<Stone>>();
+        private Dictionary<Entry, Stone> _Stones = new Dictionary<Entry, Stone>();
+        private Dictionary<Stone, _Leader> _Leaders = new Dictionary<Stone, _Leader>();
     }
 }

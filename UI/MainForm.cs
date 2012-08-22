@@ -20,12 +20,10 @@ namespace Hailstone.UI
             this._Domain = new Domain(x => (x % 2 == 0) ? (x / 2) : (x * 3 + 1));
             this._World = new World(this._Domain);
 
-            List<Entry> entries = new List<Entry>();
-            for (uint t = 1; t < 4000; t++)
+            for (uint t = 1; t < 5000; t++)
             {
-                entries.Add(this._Domain[t]);
+                Entry x = this._Domain[t];
             }
-            this._Wave = new Wave(entries);
             this._World.Insert(this._Domain[1], Vector.Zero, Vector.Zero);
         }
 
@@ -117,7 +115,6 @@ namespace Hailstone.UI
         public void Update(double Time)
         {
             this._Camera.Update(Time);
-            this._Wave.Update(this._World, Time);
             this._World.Update(Time);
             Stone.SelectionPulsePhase += (Settings.Current.StonePulseSpeed * Time) % 1.0;
         }
@@ -166,11 +163,8 @@ namespace Hailstone.UI
         }
 
         private bool _Loaded;
-        private uint _Next;
-        private int _Cycle;
         private Camera _Camera;
         private Domain _Domain;
         private World _World;
-        private Wave _Wave;
     }
 }

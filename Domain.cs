@@ -40,7 +40,7 @@ namespace Hailstone
             get
             {
                 Entry entry;
-                if (this._Entries.TryGetValue(Value + 1, out entry))
+                if (this._Entries.TryGetValue(Value, out entry))
                     return entry;
                 else
                     return this._Create(Value, this.Generator(Value));

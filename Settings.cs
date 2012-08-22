@@ -35,7 +35,7 @@ namespace Hailstone
                     CameraMaxZoom = 0.0,
                     CameraZoomSpeed = 1.0,
 
-                    StoneIntroductionDelay = 2.0,
+                    StoneDamping = 0.2,
                     StoneNumberSize = 0.3,
                     StoneNumberColor = new Color(0.9, 1.0, 1.0, 1.0),
                     StoneFillColor = new ExtendedColor
@@ -59,9 +59,14 @@ namespace Hailstone
                     StonePulseLength = 10.0,
                     StonePulseSpeed = 0.3,
 
+                    StoneIntroductionPressureThreshold = 0.5,
+                    StoneIntroductionPressureExpansion = 1.05,
+                    StoneIntroductionTimeout = 5.0,
+                    StoneIntroductionSpeed = 0.1,
+
                     LinkWidth = 0.07,
                     LinkMinimumArrowLength = 0.8,
-                    LinkTargetLength = 1.3,
+                    LinkTargetLength = 2.6,
 
                     BackgroundColor = new Color(0.5, 0.7, 0.9, 1.0)
                 };
@@ -99,9 +104,9 @@ namespace Hailstone
         public double CameraZoomSpeed { get; set; }
 
         [Category("Stone")]
-        [DisplayName("Introduction Delay")]
-        [Description("The time between stone insertions")]
-        public double StoneIntroductionDelay { get; set; }
+        [DisplayName("Movement Damping")]
+        [Description("The damping factor applied to stone movement")]
+        public double StoneDamping { get; set; }
 
         [Category("Stone")]
         [DisplayName("Number Size")]
@@ -138,6 +143,26 @@ namespace Hailstone
         [Description("The rate at which selected stones pulse")]
         public double StonePulseSpeed { get; set; }
 
+        [Category("Stone Introduction")]
+        [DisplayName("Pressure Threshold")]
+        [Description("The maximum local pressure before a new stone may be introduced")]
+        public double StoneIntroductionPressureThreshold { get; set; }
+
+        [Category("Stone Introduction")]
+        [DisplayName("Pressure Damping")]
+        [Description("The expansion factor applied to \"Pressure Threshold\" over time for a given stone")]
+        public double StoneIntroductionPressureExpansion { get; set; }
+
+        [Category("Stone Introduction")]
+        [DisplayName("Timeout")]
+        [Description("The time allowed for a stone to be introduced before it is discarded")]
+        public double StoneIntroductionTimeout { get; set; }
+
+        [Category("Stone Introduction")]
+        [DisplayName("Initial Speed")]
+        [Description("The initial speed given to introduced stones")]
+        public double StoneIntroductionSpeed { get; set; }
+
         [Category("Link")]
         [DisplayName("Link Width")]
         [Description("The width of the links between stones")]
@@ -150,7 +175,7 @@ namespace Hailstone
 
         [Category("Link")]
         [DisplayName("Link Target Length")]
-        [Description("The ideal length for links between stones")]
+        [Description("The ideal length for links between stones, as a factor of radius")]
         public double LinkTargetLength { get; set; }
 
         [Category("Background")]
