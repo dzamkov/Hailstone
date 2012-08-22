@@ -77,6 +77,7 @@ namespace Hailstone
         {
             Entry entry = new Entry(Value);
             Entry next;
+            List<Entry> divergent;
             if (this._Entries.TryGetValue(Next, out next))
             {
                 entry.Next = next;
@@ -84,15 +85,23 @@ namespace Hailstone
             }
             else
             {
-                List<Entry> divergent;
                 if (!this._Divergent.TryGetValue(Next, out divergent))
                     this._Divergent[Next] = divergent = new List<Entry>();
                 divergent.Add(entry);
             }
-            if (this._Divergent.TryGetValue(Value, out entry.Previous))
+            if (this._Divergent.TryGetValue(Value, out divergent))
+            {
+                entry.Previous = divergent;
                 this._Divergent.Remove(Value);
+                foreach (Entry p in divergent)
+                {
+                    p.Next = entry;
+                }
+            }
             else
+            {
                 entry.Previous = new List<Entry>();
+            }
             this._Entries[Value] = entry;
             return entry;
         }

@@ -35,6 +35,7 @@ namespace Hailstone
                     CameraMaxZoom = 0.0,
                     CameraZoomSpeed = 1.0,
 
+                    StoneIntroductionDelay = 2.0,
                     StoneNumberSize = 0.3,
                     StoneNumberColor = new Color(0.9, 1.0, 1.0, 1.0),
                     StoneFillColor = new ExtendedColor
@@ -96,6 +97,11 @@ namespace Hailstone
         [DisplayName("Zoom Speed")]
         [Description("The speed multiplier applied to camera zooming")]
         public double CameraZoomSpeed { get; set; }
+
+        [Category("Stone")]
+        [DisplayName("Introduction Delay")]
+        [Description("The time between stone insertions")]
+        public double StoneIntroductionDelay { get; set; }
 
         [Category("Stone")]
         [DisplayName("Number Size")]

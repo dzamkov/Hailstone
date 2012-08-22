@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Linq;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -18,6 +19,14 @@ namespace Hailstone.UI
             this._Camera = new Camera();
             this._Domain = new Domain(x => (x % 2 == 0) ? (x / 2) : (x * 3 + 1));
             this._World = new World(this._Domain);
+
+            List<Entry> entries = new List<Entry>();
+            for (uint t = 1; t < 4000; t++)
+            {
+                entries.Add(this._Domain[t]);
+            }
+            this._Wave = new Wave(entries);
+            this._World.Insert(this._Domain[1], Vector.Zero, Vector.Zero);
         }
 
         /// <summary>
@@ -107,12 +116,8 @@ namespace Hailstone.UI
         /// </summary>
         public void Update(double Time)
         {
-            if ((this._Cycle = (this._Cycle + 1) % 3) == 0 && this._World.Count < 2000)
-            {
-                this._World.Insert(this._Domain[this._Next++], Vector.Zero);
-            }
-
             this._Camera.Update(Time);
+            this._Wave.Update(this._World, Time);
             this._World.Update(Time);
             Stone.SelectionPulsePhase += (Settings.Current.StonePulseSpeed * Time) % 1.0;
         }
@@ -166,5 +171,6 @@ namespace Hailstone.UI
         private Camera _Camera;
         private Domain _Domain;
         private World _World;
+        private Wave _Wave;
     }
 }

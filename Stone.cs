@@ -18,17 +18,17 @@ namespace Hailstone
         /// <summary>
         /// The force per unit length applied by a link.
         /// </summary>
-        public static readonly double LinkForce = 60.0;
+        public static readonly double LinkForce = 20.0;
 
         /// <summary>
         /// The repulsion force applied by nearby stones.
         /// </summary>
-        public static readonly double RepelForce = 60.0;
+        public static readonly double RepelForce = 30.0;
 
         /// <summary>
         /// The drag force for stones.
         /// </summary>
-        public static readonly double DragForce = 10.0;
+        public static readonly double DragForce = 1.0;
 
         /// <summary>
         /// The entry this stone represents.

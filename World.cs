@@ -95,38 +95,29 @@ namespace Hailstone
         }
 
         /// <summary>
-        /// Tries inserting a stone for the given entry at the given position. If one already exists, it will
-        /// be returned.
+        /// Inserts a stone for the given entry. There must not be any existing stones for the entry.
         /// </summary>
-        public Stone Insert(Entry Entry, Vector Position)
+        public Stone Insert(Entry Entry, Vector Position, Vector Velocity)
         {
-            Stone stone;
-            if (!this._Stones.TryGetValue(Entry, out stone))
-            {
-                stone = new Stone(Entry);
-                stone.Position = Position;
-                _Tweak(stone, ref stone.Velocity);
-                this._Link(stone, Entry);
-            }
+            Stone stone = new Stone(Entry);
+            stone.Position = Position;
+            stone.Velocity = Velocity;
+            this._Introduce(stone, Entry);
             return stone;
         }
 
         /// <summary>
-        /// Changes a vector slightly to make it distinct from other vectors.
+        /// Inserts a stone for the given entry. There must not be any existing stones for the entry.
         /// </summary>
-        private static void _Tweak(object Object, ref Vector Vector)
+        public void Insert(Stone Stone)
         {
-            int h = Object.GetHashCode();
-            int x = h & 0xFF;
-            int y = (h & 0xFF00) >> 8;
-            Vector.X += (x - 127.0) * 0.000001;
-            Vector.Y += (y - 127.0) * 0.000001;
+            this._Introduce(Stone, Stone.Entry);
         }
 
         /// <summary>
-        /// Links up a newly-introduced stone.
+        /// Introduces a stone to the world.
         /// </summary>
-        private void _Link(Stone Stone, Entry Entry)
+        private void _Introduce(Stone Stone, Entry Entry)
         {
             foreach (Entry p in Entry.Previous)
             {
@@ -140,6 +131,65 @@ namespace Hailstone
                 Stone.Next = next;
             this._Stones[Entry] = Stone;
             this._Insert(Stone, _GetZone(Stone.Position));
+        }
+
+        /// <summary>
+        /// Tries to get a stone for the given entry. Returns false if none exists in this world.
+        /// </summary>
+        public bool TryGetStone(Entry Entry, out Stone Stone)
+        {
+            return this._Stones.TryGetValue(Entry, out Stone);
+        }
+
+        /// <summary>
+        /// Indicates whether the given entry can be introduce, if there is at least one stone in the world it
+        /// can immediately link to. If so, the position and velocity of the stone to be introduced are returned.
+        /// </summary>
+        public bool CanIntroduce(Entry Entry, out Vector Position, out Vector Velocity)
+        {
+            Position = Vector.Zero;
+            Velocity = Vector.Zero;
+            int influences = 0;
+            foreach (Entry p in Entry.Previous)
+            {
+                Stone prev;
+                if (this._Stones.TryGetValue(p, out prev))
+                {
+                    Position += prev.Position;
+                    Velocity += prev.Velocity;
+                    influences++;
+                }
+            }
+            Entry n = Entry.Next;
+            Stone next;
+            if (n != null && this._Stones.TryGetValue(n, out next))
+            {
+                Position += next.Position;
+                Velocity += next.Velocity;
+                influences++;
+            }
+
+            if (influences > 0)
+            {
+                _Tweak(Entry, ref Position);
+                Position /= influences;
+                Velocity /= influences;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Changes a vector slightly to make it distinct from other vectors.
+        /// </summary>
+        private static void _Tweak(object Object, ref Vector Vector)
+        {
+            int h = Object.GetHashCode();
+            int x = h & 0xFF;
+            int y = (h & 0xFF00) >> 8;
+            Vector.X += (x - 127.0) * 0.000001;
+            Vector.Y += (y - 127.0) * 0.000001;
         }
 
         /// <summary>
@@ -270,5 +320,77 @@ namespace Hailstone
 
         private Dictionary<ZoneIndex, List<Stone>> _Zones = new Dictionary<ZoneIndex, List<Stone>>();
         private Dictionary<Entry, Stone> _Stones = new Dictionary<Entry, Stone>();
+    }
+
+    /// <summary>
+    /// Contains the entries to be introduced into a world automatically over a period of time.
+    /// </summary>
+    public class Wave
+    {
+        public Wave(IEnumerable<Entry> Entries)
+        {
+            this.Entries = new HashSet<Entry>(Entries);
+            this.Delay = 0.0;
+        }
+
+        /// <summary>
+        /// The entries to be introduced in this wave.
+        /// </summary>
+        public readonly HashSet<Entry> Entries;
+
+        /// <summary>
+        /// The delay until the next entry gets introduced.
+        /// </summary>
+        public double Delay;
+
+        /// <summary>
+        /// Updates this wave, introducing entries as needed. Returns false when the wave is finished.
+        /// </summary>
+        public bool Update(World World, double Time)
+        {
+            this.Delay -= Time;
+            if (this.Delay < 0.0)
+            {
+                if (this.TryIntroduce(World))
+                {
+                    this.Delay = Settings.Current.StoneIntroductionDelay;
+                    return true;
+                }
+                else
+                {
+                    this.Entries.Clear();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Tries to introduce as many entries in the wave as possible to the given world.
+        /// </summary>
+        public bool TryIntroduce(World World)
+        {
+            List<Stone> entrants = new List<Stone>();
+            Vector position, velocity;
+            foreach (Entry entry in this.Entries)
+            {
+                if (World[entry] == null)
+                {
+                    if (World.CanIntroduce(entry, out position, out velocity))
+                    {
+                        Stone stone = new Stone(entry);
+                        stone.Position = position;
+                        stone.Velocity = velocity;
+                        entrants.Add(stone);
+                    }
+                }
+            }
+            foreach (Stone entrant in entrants)
+            {
+                this.Entries.Remove(entrant.Entry);
+                World.Insert(entrant);
+            }
+            return entrants.Count > 0;
+        }
     }
 }
