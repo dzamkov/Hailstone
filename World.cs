@@ -454,10 +454,15 @@ namespace Hailstone
                 Entry n = entry.Next;
                 if (n != null && !World.ContainsEntry(n))
                     return n;
+                uint maxweight = 0;
+                Entry next = null;
                 foreach (Entry p in entry.Previous)
-                    if (!World.ContainsEntry(p))
-                        return p;
-                return null;
+                    if (!World.ContainsEntry(p) && p.Weight > maxweight)
+                    {
+                        maxweight = p.Weight;
+                        next = p;
+                    }
+                return next;
             }
         }
 

@@ -103,7 +103,38 @@ namespace Hailstone
                 entry.Previous = new List<Entry>();
             }
             this._Entries[Value] = entry;
+            this._CalculateWeight(entry);
             return entry;
+        }
+
+        /// <summary>
+        /// Calculates the weight of an entry, and updates all dependent entries.
+        /// </summary>
+        private void _CalculateWeight(Entry Entry)
+        {
+            uint weight = 1;
+            foreach (Entry prev in Entry.Previous)
+                weight += prev.Weight;
+            Entry.Weight = weight;
+
+            Entry cur = Entry.Next;
+            while (true)
+            {
+                if (cur == null) return;
+                if (cur.Weight == uint.MaxValue) return;
+                if (cur == Entry)
+                {
+                    Entry.Weight = uint.MaxValue;
+                    cur = Entry.Next;
+                    while (cur != Entry)
+                    {
+                        cur.Weight = uint.MaxValue;
+                        cur = cur.Next;
+                    }
+                }
+                cur.Weight += weight;
+                cur = cur.Next;
+            }
         }
 
         private Dictionary<uint, Entry> _Entries;
@@ -134,5 +165,10 @@ namespace Hailstone
         /// The entry in the associated domain produced by the generator function when this entry is used as the input.
         /// </summary>
         public Entry Next;
+
+        /// <summary>
+        /// One plus the sum of the weights of the previous entries. If this entry is part of a loop, its weight will be uint.MaxValue.
+        /// </summary>
+        public uint Weight;
     }
 }

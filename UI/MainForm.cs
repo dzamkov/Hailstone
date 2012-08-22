@@ -20,7 +20,7 @@ namespace Hailstone.UI
             this._Domain = new Domain(x => (x % 2 == 0) ? (x / 2) : (x * 3 + 1));
             this._World = new World(this._Domain);
 
-            for (uint t = 1; t < 400; t++)
+            for (uint t = 1; t < 10000; t++)
             {
                 Entry x = this._Domain[t];
             }
