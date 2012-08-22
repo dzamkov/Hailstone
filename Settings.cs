@@ -35,7 +35,7 @@ namespace Hailstone
                     CameraMaxZoom = 0.0,
                     CameraZoomSpeed = 1.0,
 
-                    StoneDamping = 0.2,
+                    StoneDamping = 0.1,
                     StoneNumberSize = 0.3,
                     StoneNumberColor = new Color(0.9, 1.0, 1.0, 1.0),
                     StoneFillColor = new ExtendedColor

@@ -257,6 +257,22 @@ namespace Hailstone
         }
 
         /// <summary>
+        /// Applies this transform to a bounding rectangle.
+        /// </summary>
+        public Rectangle Project(Rectangle Source)
+        {
+            Vector tl = this.Project(Source.TopLeft);
+            Vector tr = this.Project(Source.TopRight);
+            Vector bl = this.Project(Source.BottomLeft);
+            Vector br = this.Project(Source.BottomRight);
+            return new Rectangle(
+                Math.Min(tl.X, Math.Min(tr.X, Math.Min(bl.X, br.X))),
+                Math.Max(tl.Y, Math.Max(tr.Y, Math.Max(bl.Y, br.Y))),
+                Math.Max(tl.X, Math.Max(tr.X, Math.Max(bl.X, br.X))),
+                Math.Min(tl.Y, Math.Min(tr.Y, Math.Min(bl.Y, br.Y))));
+        }
+
+        /// <summary>
         /// Composes two transforms such that projection in the returned transform is equivalent to
         /// projection in A followed by projection in B.
         /// </summary>

@@ -178,18 +178,6 @@ namespace Hailstone
         }
 
         /// <summary>
-        /// Changes a vector slightly to make it distinct from other vectors.
-        /// </summary>
-        private static void _Tweak(object Object, ref Vector Vector)
-        {
-            int h = Object.GetHashCode();
-            int x = h & 0xFF;
-            int y = (h & 0xFF00) >> 8;
-            Vector.X += (x - 127.0) * 0.000001;
-            Vector.Y += (y - 127.0) * 0.000001;
-        }
-
-        /// <summary>
         /// Gets a stone at the given location, or null if there's none there.
         /// </summary>
         public Stone Pick(Vector Point)
@@ -276,7 +264,7 @@ namespace Hailstone
                 if (l.Update(this, s, Time, pressuredamping, out i))
                 {
                     if (!l.Reset(this, s)) changes.Add(delegate { this._Leaders.Remove(s); });
-                    if (i != null) changes.Add(delegate { this.Insert(i); });
+                    if (i != null) changes.Add(delegate { if (!this.ContainsEntry(i.Entry)) this.Insert(i); });
                 }
                 else
                 {
@@ -293,14 +281,29 @@ namespace Hailstone
         /// <summary>
         /// Renders this world to the current context.
         /// </summary>
-        public void Render(double Extent)
+        public void Render(Rectangle Bounds, double Extent)
         {
+            ZoneIndex bl = _GetZone(Bounds.BottomLeft);
+            ZoneIndex tr = _GetZone(Bounds.TopRight);
+
             Render r;
             Atlas.Begin(out r);
-            foreach (Stone stone in this._Stones.Values)
-            {
+            List<Stone> selected = new List<Stone>();
+            for (int x = bl.X - 1; x <= tr.X + 1; x++)
+                for (int y = bl.Y - 1; y <= tr.Y + 1; y++)
+                {
+                    List<Stone> zone;
+                    if (this._Zones.TryGetValue(new ZoneIndex(x, y), out zone))
+                        foreach (Stone stone in zone)
+                        {
+                            if (Stone.GetSelectionIndex(stone) != uint.MaxValue)
+                                selected.Add(stone);
+                            else
+                                Atlas.DrawStone(r, stone, Extent);
+                        }
+                }
+            foreach (Stone stone in selected)
                 Atlas.DrawStone(r, stone, Extent);
-            }
             Atlas.End(r);
         }
 
@@ -428,6 +431,18 @@ namespace Hailstone
                     Introduced = null;
                     return false;
                 }
+            }
+
+            /// <summary>
+            /// Changes a vector slightly to make it distinct from other vectors.
+            /// </summary>
+            private static void _Tweak(object Object, ref Vector Vector)
+            {
+                int h = Object.GetHashCode();
+                int x = h & 0xFF;
+                int y = (h & 0xFF00) >> 8;
+                Vector.X += (x - 127.0) * 0.0001;
+                Vector.Y += (y - 127.0) * 0.0001;
             }
 
             /// <summary>

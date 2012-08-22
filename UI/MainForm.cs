@@ -20,7 +20,7 @@ namespace Hailstone.UI
             this._Domain = new Domain(x => (x % 2 == 0) ? (x / 2) : (x * 3 + 1));
             this._World = new World(this._Domain);
 
-            for (uint t = 1; t < 5000; t++)
+            for (uint t = 1; t < 400; t++)
             {
                 Entry x = this._Domain[t];
             }
@@ -80,17 +80,6 @@ namespace Hailstone.UI
         }
 
         /// <summary>
-        /// Gets the transformation from worldspace to device coordinates.
-        /// </summary>
-        public Transform WorldToDevice
-        {
-            get
-            {
-                return (this.DeviceToView * this.ViewToWorld).Inverse;
-            }
-        }
-
-        /// <summary>
         /// Renders the contents of this form.
         /// </summary>
         public void Render()
@@ -100,10 +89,12 @@ namespace Hailstone.UI
                 GL.ClearColor(Settings.Current.BackgroundColor);
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
-                Transform trans = this.WorldToDevice;
-                Matrix4d mat = trans;
+                Transform dtw = this.DeviceToView * this.ViewToWorld;
+                Transform wtd = dtw.Inverse;
+                Rectangle bounds = dtw.Project(new Rectangle(-1.0, 1.0, 1.0, -1.0));
+                Matrix4d mat = wtd;
                 GL.LoadMatrix(ref mat);
-                this._World.Render(this._Camera.Extent);
+                this._World.Render(bounds, this._Camera.Extent);
 
                 this._GLControl.SwapBuffers();
             }
