@@ -56,19 +56,19 @@ namespace Hailstone.Interface
                 {
                     if (Lua.lua_isstring(State, 2) == 0) return 0;
                     string key = Lua.lua_tostring(State, 2).ToString();
-                    MethodInfo method = typeof(T).GetMethod(key);
+                    MethodInfo method = typeof(T).GetMethod(key, _Mask);
                     if (method != null)
                     {
                         Lua.lua_pushcfunction(State, _CallFunction(Object, method));
                         return 1;
                     }
-                    PropertyInfo property = typeof(T).GetProperty(key);
+                    PropertyInfo property = typeof(T).GetProperty(key, _Mask);
                     if (property != null)
                     {
                         TypeInterface.Get(property.PropertyType).Push(State, property.GetValue(Object, null));
                         return 1;
                     }
-                    FieldInfo field = typeof(T).GetField(key);
+                    FieldInfo field = typeof(T).GetField(key, _Mask);
                     if (field != null)
                     {
                         TypeInterface.Get(field.FieldType).Push(State, field.GetValue(Object));
@@ -96,18 +96,18 @@ namespace Hailstone.Interface
                 {
                     if (Lua.lua_isstring(State, 2) == 0) return 0;
                     string key = Lua.lua_tostring(State, 2).ToString();
-                    MethodInfo method = typeof(T).GetMethod(key);
+                    MethodInfo method = typeof(T).GetMethod(key, _Mask);
                     if (method != null)
                     {
                         throw new Exception(String.Format("{0} is a method and can not be set.", method.Name));
                     }
-                    PropertyInfo property = typeof(T).GetProperty(key);
+                    PropertyInfo property = typeof(T).GetProperty(key, _Mask);
                     if (property != null)
                     {
                         property.SetValue(Object, TypeInterface.Get(property.PropertyType).To(State, 3), null);
                         return 0;
                     }
-                    FieldInfo field = typeof(T).GetField(key);
+                    FieldInfo field = typeof(T).GetField(key, _Mask);
                     if (field != null)
                     {
                         field.SetValue(Object, TypeInterface.Get(field.FieldType).To(State, 3));
@@ -189,12 +189,12 @@ namespace Hailstone.Interface
         {
             if (!From.Equals(To))
             {
-                foreach (FieldInfo field in typeof(T).GetFields())
+                foreach (FieldInfo field in typeof(T).GetFields(_Mask))
                 {
                     if (!TypeInterface.Get(field.FieldType).Mutate(_FieldName(Name, field.Name), field.GetValue(From), field.GetValue(To), Code))
                         return false;
                 }
-                foreach (PropertyInfo property in typeof(T).GetProperties())
+                foreach (PropertyInfo property in typeof(T).GetProperties(_Mask))
                 {
                     if (!TypeInterface.Get(property.PropertyType).Mutate(_FieldName(Name, property.Name), property.GetValue(From, null), property.GetValue(To, null), Code))
                         return false;
@@ -202,6 +202,11 @@ namespace Hailstone.Interface
             }
             return true;
         }
+
+        /// <summary>
+        /// The mask that determines which properties are used in the interface.
+        /// </summary>
+        private static readonly BindingFlags _Mask = BindingFlags.Instance | BindingFlags.Public;
 
         /// <summary>
         /// Gets the name for a field, given the name for the object.

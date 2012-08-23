@@ -77,7 +77,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Render.cs" />
     <Compile Include="Domain.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Interface\Settings.cs" />
     <Compile Include="UI\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>

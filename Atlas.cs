@@ -5,6 +5,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
+using Hailstone.Interface;
+
 namespace Hailstone
 {
     /// <summary>

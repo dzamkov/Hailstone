@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Hailstone.Interface;
+
 namespace Hailstone
 {
     /// <summary>

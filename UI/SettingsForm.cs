@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 
+using Hailstone.Interface;
+
 namespace Hailstone.UI
 {
     public partial class SettingsForm : Form
@@ -32,11 +34,10 @@ namespace Hailstone.UI
         /// </summary>
         public new void Update()
         {
-            Settings.UpdateOptions();
             this._Selector.Items.Clear();
-            foreach (var kvp in Settings.Options)
+            foreach (var option in Settings.Options)
             {
-                this._Selector.Items.Add(kvp.Key);
+                this._Selector.Items.Add(option);
             }
             this._PropertyGrid.SelectedObject = Settings.Current;
         }
@@ -44,35 +45,27 @@ namespace Hailstone.UI
         private void _SaveButton_Click(object sender, EventArgs e)
         {
             string name = this._Selector.Text;
+            Settings.Save(Settings.Current, name);
             if (!this._Selector.Items.Contains(name))
                 this._Selector.Items.Add(name);
         }
 
         private void _LoadButton_Click(object sender, EventArgs e)
         {
-            Settings settings = Settings.Load(this._Selector.Text);
-            if (settings != null)
-            {
-                this._PropertyGrid.SelectedObject = settings;
-                Settings.Current = settings;
-            }
+            string name = this._Selector.Text;
+            if (Settings.Load(name, ref Settings.Current))
+                this._PropertyGrid.SelectedObject = Settings.Current;
             else
-            {
                 this._BadName();
-            }
         }
 
         private void _Delete_Click(object sender, EventArgs e)
         {
             string name = this._Selector.Text;
             if (Settings.Delete(name))
-            {
                 this._Selector.Items.Remove(name);
-            }
             else
-            {
                 this._BadName();
-            }
         }
 
         /// <summary>
