@@ -285,26 +285,51 @@ namespace Hailstone
         {
             ZoneIndex bl = _GetZone(Bounds.BottomLeft);
             ZoneIndex tr = _GetZone(Bounds.TopRight);
+            bl.X -= 1; tr.X += 1;
+            bl.Y -= 1; tr.Y += 1;
+            int zonecount = (tr.X - bl.X) * (tr.Y - bl.Y);
 
             Render r;
             Atlas.Begin(out r);
             List<Stone> selected = new List<Stone>();
-            for (int x = bl.X - 1; x <= tr.X + 1; x++)
-                for (int y = bl.Y - 1; y <= tr.Y + 1; y++)
+            if (zonecount < this._Zones.Count)
+            {
+                for (int x = bl.X; x <= tr.X; x++)
+                    for (int y = bl.Y; y <= tr.Y; y++)
+                    {
+                        List<Stone> zone;
+                        if (this._Zones.TryGetValue(new ZoneIndex(x, y), out zone))
+                            this._DrawZone(r, zone, Extent, selected);
+                    }
+            }
+            else
+            {
+                foreach (var kvp in this._Zones)
                 {
-                    List<Stone> zone;
-                    if (this._Zones.TryGetValue(new ZoneIndex(x, y), out zone))
-                        foreach (Stone stone in zone)
-                        {
-                            if (Stone.GetSelectionIndex(stone) != uint.MaxValue)
-                                selected.Add(stone);
-                            else
-                                Atlas.DrawStone(r, stone, Extent);
-                        }
+                    ZoneIndex index = kvp.Key;
+                    int x = index.X;
+                    int y = index.Y;
+                    if (x >= bl.X && x <= tr.X && y >= bl.Y && y <= tr.Y)
+                        this._DrawZone(r, kvp.Value, Extent, selected);
                 }
+            }
             foreach (Stone stone in selected)
                 Atlas.DrawStone(r, stone, Extent);
             Atlas.End(r);
+        }
+
+        /// <summary>
+        /// Draws all the stones in the given zone.
+        /// </summary>
+        private void _DrawZone(Render Render, List<Stone> Zone, double Extent, List<Stone> Selected)
+        {
+            foreach (Stone stone in Zone)
+            {
+                if (Stone.GetSelectionIndex(stone) != uint.MaxValue)
+                    Selected.Add(stone);
+                else
+                    Atlas.DrawStone(Render, stone, Extent);
+            }
         }
 
         /// <summary>

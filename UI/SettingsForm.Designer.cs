@@ -32,11 +32,14 @@
             this._Selector = new System.Windows.Forms.ComboBox();
             this._SaveButton = new System.Windows.Forms.Button();
             this._LoadButton = new System.Windows.Forms.Button();
+            this._Delete = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // _PropertyGrid
             // 
-            this._PropertyGrid.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this._PropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this._PropertyGrid.Location = new System.Drawing.Point(0, 29);
             this._PropertyGrid.Name = "_PropertyGrid";
             this._PropertyGrid.Size = new System.Drawing.Size(276, 337);
@@ -44,15 +47,18 @@
             // 
             // _Selector
             // 
+            this._Selector.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this._Selector.FormattingEnabled = true;
-            this._Selector.Location = new System.Drawing.Point(12, 2);
+            this._Selector.Location = new System.Drawing.Point(0, 2);
             this._Selector.Name = "_Selector";
-            this._Selector.Size = new System.Drawing.Size(158, 21);
+            this._Selector.Size = new System.Drawing.Size(128, 21);
             this._Selector.TabIndex = 4;
             // 
             // _SaveButton
             // 
-            this._SaveButton.Location = new System.Drawing.Point(176, 2);
+            this._SaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._SaveButton.Location = new System.Drawing.Point(134, 2);
             this._SaveButton.Name = "_SaveButton";
             this._SaveButton.Size = new System.Drawing.Size(43, 21);
             this._SaveButton.TabIndex = 5;
@@ -62,7 +68,8 @@
             // 
             // _LoadButton
             // 
-            this._LoadButton.Location = new System.Drawing.Point(225, 2);
+            this._LoadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._LoadButton.Location = new System.Drawing.Point(183, 2);
             this._LoadButton.Name = "_LoadButton";
             this._LoadButton.Size = new System.Drawing.Size(39, 21);
             this._LoadButton.TabIndex = 6;
@@ -70,11 +77,22 @@
             this._LoadButton.UseVisualStyleBackColor = true;
             this._LoadButton.Click += new System.EventHandler(this._LoadButton_Click);
             // 
+            // _Delete
+            // 
+            this._Delete.Location = new System.Drawing.Point(228, 2);
+            this._Delete.Name = "_Delete";
+            this._Delete.Size = new System.Drawing.Size(48, 21);
+            this._Delete.TabIndex = 7;
+            this._Delete.Text = "Delete";
+            this._Delete.UseVisualStyleBackColor = true;
+            this._Delete.Click += new System.EventHandler(this._Delete_Click);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(276, 366);
+            this.Controls.Add(this._Delete);
             this.Controls.Add(this._LoadButton);
             this.Controls.Add(this._SaveButton);
             this.Controls.Add(this._Selector);
@@ -97,5 +115,6 @@
         private System.Windows.Forms.ComboBox _Selector;
         private System.Windows.Forms.Button _SaveButton;
         private System.Windows.Forms.Button _LoadButton;
+        private System.Windows.Forms.Button _Delete;
     }
 }

@@ -32,14 +32,32 @@ namespace Hailstone
         public static readonly Dictionary<string, Func<Settings>> Options = new Dictionary<string, Func<Settings>>();
 
         /// <summary>
-        /// Saves the a settings object with the given name.
+        /// Saves the settings object with the given name.
         /// </summary>
         public static void Save(Settings Settings, string Name)
         {
             string path = "Settings\\" + Name + ".config";
             using (FileStream stream = File.OpenWrite(path))
                 Serializer.Serialize(stream, Settings);
-            Options[Name] = _Load(path);
+            Options[Name] = _Read(path);
+        }
+
+        /// <summary>
+        /// Deletes the settings object with the given name.
+        /// </summary>
+        public static bool Delete(string Name)
+        {
+            if (Options.ContainsKey(Name))
+            {
+                string path = "Settings\\" + Name + ".config";
+                if (File.Exists(path)) File.Delete(path);
+                Options.Remove(Name);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -47,13 +65,17 @@ namespace Hailstone
         /// </summary>
         public static Settings Load(string Name)
         {
-            return Options[Name]();
+            Func<Settings> settings;
+            if (Options.TryGetValue(Name, out settings))
+                return settings();
+            else
+                return null;
         }
 
         /// <summary>
-        /// Creates a function to load a settings file from a path.
+        /// Creates a function to read a settings file from a path.
         /// </summary>
-        private static Func<Settings> _Load(string Path)
+        private static Func<Settings> _Read(string Path)
         {
             return delegate
             {
@@ -76,14 +98,14 @@ namespace Hailstone
             {
                 foreach (string file in Directory.GetFiles("Settings"))
                     if (Path.GetExtension(file) == ".config")
-                        Options[Path.GetFileNameWithoutExtension(file)] = _Load(file);
+                        Options[Path.GetFileNameWithoutExtension(file)] = _Read(file);
             }
         }
 
         static Settings()
         {
             UpdateOptions();
-            Load("Default");
+            Current = Load("Default");
         }
 
         /// <summary>
@@ -98,7 +120,7 @@ namespace Hailstone
                     CameraZoomDamping = 0.01,
                     CameraMovementDamping = 0.01,
                     CameraZoomMovement = 0.95,
-                    CameraMinZoom = -10.0,
+                    CameraMinZoom = -7.0,
                     CameraMaxZoom = 0.0,
                     CameraZoomSpeed = 1.0,
 

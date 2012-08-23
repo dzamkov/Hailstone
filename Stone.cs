@@ -20,7 +20,7 @@ namespace Hailstone
         /// </summary>
         public readonly Entry Entry;
 
-        /// <summary>
+        /// <summary>s
         /// The radius of this stone.
         /// </summary>
         public double Radius;
