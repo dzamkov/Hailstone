@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Hailstone.Interface;
 
-namespace Hailstone.UI
+namespace Hailstone
 {
     public partial class MainForm : Form
     {
@@ -152,7 +152,7 @@ namespace Hailstone.UI
 
         private void _SettingsButton_Click(object sender, EventArgs e)
         {
-            SettingsForm.Show();
+            new PropertyForm("Settings", Settings.Current).Show();
         }
 
         private void _EditorButton_Click(object sender, EventArgs e)

@@ -75,25 +75,28 @@
     <Compile Include="Interface\EditorForm.Designer.cs">
       <DependentUpon>EditorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interface\FileToolStripMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Interface\Global.cs" />
     <Compile Include="Interface\Primitive.cs" />
     <Compile Include="Interface\Serialization.cs" />
     <Compile Include="Interface\TypeInterface.cs" />
-    <Compile Include="UI\MainForm.cs">
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\MainForm.Designer.cs">
+    <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Render.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="Interface\Settings.cs" />
-    <Compile Include="UI\SettingsForm.cs">
+    <Compile Include="Interface\PropertyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
+    <Compile Include="Interface\PropertyForm.Designer.cs">
+      <DependentUpon>PropertyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Stone.cs" />
     <Compile Include="Textures.Designer.cs">
@@ -115,6 +118,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Interface\Lua.xml" />
     <None Include="Resources\Atlas.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UI\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

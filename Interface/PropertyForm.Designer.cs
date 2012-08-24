@@ -1,6 +1,6 @@
 ﻿namespace Hailstone.Interface
 {
-    partial class EditorForm
+    partial class PropertyForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,45 +28,38 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this._TextEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this._PropertyGrid = new System.Windows.Forms.PropertyGrid();
             this._MenuStrip = new System.Windows.Forms.MenuStrip();
-            this._CodeCompletionImageList = new System.Windows.Forms.ImageList(this.components);
             this.SuspendLayout();
             // 
-            // _TextEditor
+            // _PropertyGrid
             // 
-            this._TextEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._TextEditor.IsReadOnly = false;
-            this._TextEditor.Location = new System.Drawing.Point(0, 24);
-            this._TextEditor.Name = "_TextEditor";
-            this._TextEditor.Size = new System.Drawing.Size(414, 389);
-            this._TextEditor.TabIndex = 0;
+            this._PropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._PropertyGrid.Location = new System.Drawing.Point(0, 24);
+            this._PropertyGrid.Name = "_PropertyGrid";
+            this._PropertyGrid.Size = new System.Drawing.Size(276, 342);
+            this._PropertyGrid.TabIndex = 3;
             // 
             // _MenuStrip
             // 
             this._MenuStrip.Location = new System.Drawing.Point(0, 0);
             this._MenuStrip.Name = "_MenuStrip";
-            this._MenuStrip.Size = new System.Drawing.Size(414, 24);
-            this._MenuStrip.TabIndex = 1;
+            this._MenuStrip.Size = new System.Drawing.Size(276, 24);
+            this._MenuStrip.TabIndex = 4;
             // 
-            // _CodeCompletionImageList
-            // 
-            this._CodeCompletionImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this._CodeCompletionImageList.ImageSize = new System.Drawing.Size(16, 16);
-            this._CodeCompletionImageList.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // EditorForm
+            // PropertyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(414, 413);
-            this.Controls.Add(this._TextEditor);
+            this.ClientSize = new System.Drawing.Size(276, 366);
+            this.Controls.Add(this._PropertyGrid);
             this.Controls.Add(this._MenuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MainMenuStrip = this._MenuStrip;
-            this.Name = "EditorForm";
-            this.Text = "Code Editor";
+            this.MinimumSize = new System.Drawing.Size(292, 300);
+            this.Name = "PropertyForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -75,9 +68,7 @@
 
         #endregion
 
-        private ICSharpCode.TextEditor.TextEditorControl _TextEditor;
+        private System.Windows.Forms.PropertyGrid _PropertyGrid;
         private System.Windows.Forms.MenuStrip _MenuStrip;
-        private System.Windows.Forms.ImageList _CodeCompletionImageList;
-
     }
 }

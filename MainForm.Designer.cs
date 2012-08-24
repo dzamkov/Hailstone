@@ -1,4 +1,4 @@
-﻿namespace Hailstone.UI
+﻿namespace Hailstone
 {
     partial class MainForm
     {
