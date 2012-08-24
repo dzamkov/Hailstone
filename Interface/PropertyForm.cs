@@ -12,10 +12,8 @@ namespace Hailstone.Interface
         {
             InitializeComponent();
 
-            this._File = new FileToolStripMenuItem();
+            this._File = new FileToolStripMenuItem(Type, ".lua");
             this._MenuStrip.Items.Add(this._File);
-            this._File.Type = Type;
-            this._File.Extension = ".lua";
 
             this._PropertyGrid.SelectedObject = Object;
         }

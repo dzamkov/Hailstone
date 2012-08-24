@@ -11,92 +11,58 @@ namespace Hailstone.Interface
     /// </summary>
     public class FileToolStripMenuItem : ToolStripMenuItem
     {
-        public FileToolStripMenuItem()
+        public FileToolStripMenuItem(string Directory, string Extension)
         {
             this.Text = "File";
+            this.Extension = Extension;
 
             ToolStripMenuItem save = new ToolStripMenuItem("Save");
-            ToolStripComboBox saveselect = new ToolStripComboBox();
-            saveselect.KeyDown += delegate(object sender, KeyEventArgs e)
+            this._Setup(Directory, save, _Mode.Save, delegate(string Path)
             {
-                if (e.KeyCode == Keys.Enter)
-                {
-                    save.Owner.Hide();
-                    if (this.Save != null) this.Save.Invoke(this.GetPath(saveselect.Text));
-                }
-            };
-            save.DropDownItems.Add(saveselect);
-            save.DropDownItems.Add("Browse", null, delegate { this._BrowseSave(this.Save); });
+                if (this.Save != null)
+                    this.Save(Path);
+            });
+            this.DropDownItems.Add(save);
 
             ToolStripMenuItem load = new ToolStripMenuItem("Load");
-            ToolStripComboBox loadselect = new ToolStripComboBox();
-            loadselect.DropDownStyle = ComboBoxStyle.DropDownList;
-            loadselect.DropDown += delegate { this._Populate(loadselect); };
-            loadselect.ComboBox.SelectionChangeCommitted += delegate
+            this._Setup(Directory, load, _Mode.Load, delegate(string Path)
             {
-                load.Owner.Hide();
-                if (this.Load != null) this.Load.Invoke(this.GetPath(loadselect.Text));
-            };
-            load.DropDownItems.Add(loadselect);
-            load.DropDownItems.Add("Browse", null, delegate { this._BrowseLoad(this.Load); });
+                if (this.Load != null)
+                    this.Load(Path);
+            });
+            this.DropDownItems.Add(load);
 
             ToolStripMenuItem patch = new ToolStripMenuItem("Patch");
-            ToolStripComboBox patchselect = new ToolStripComboBox();
-            patchselect.DropDownStyle = ComboBoxStyle.DropDownList;
-            patchselect.DropDown += delegate { this._Populate(patchselect); };
-            patchselect.ComboBox.SelectionChangeCommitted += delegate
+            this._Setup(Directory, patch, _Mode.Load, delegate(string Path)
             {
-                patch.Owner.Hide();
-                if (this.Patch != null) this.Patch.Invoke(this.GetPath(patchselect.Text));
-            };
-            patch.DropDownItems.Add(patchselect);
-            patch.DropDownItems.Add("Browse", null, delegate { this._BrowseLoad(this.Patch); });
+                if (this.Patch != null)
+                    this.Patch(Path);
+            });
+            this.DropDownItems.Add(load);
 
             ToolStripMenuItem delete = new ToolStripMenuItem("Delete");
-            ToolStripComboBox deleteselect = new ToolStripComboBox();
-            deleteselect.DropDownStyle = ComboBoxStyle.DropDownList;
-            deleteselect.DropDown += delegate { this._Populate(deleteselect); };
-            deleteselect.ComboBox.SelectionChangeCommitted += delegate
+            this._Setup(Directory, delete, _Mode.Delete, delegate(string Path)
             {
-                delete.Owner.Hide();
-                File.Delete(this.GetPath(deleteselect.Text));
-            };
-            delete.DropDownItems.Add(deleteselect);
+                string message = String.Format("Are you sure you want to delete {0}?", System.IO.Path.GetFileNameWithoutExtension(Path));
+                if (File.Exists(Path))
+                    if (MessageBox.Show(message, "Delete File?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        File.Delete(Path);
+                if (System.IO.Directory.Exists(Path))
+                    if (MessageBox.Show(message, "Delete Directory?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        System.IO.Directory.Delete(Path, true);
+            });
+            this.DropDownItems.Add(load);
 
-            this.DropDownItems.Add(save);
+            
             this.DropDownItems.Add(load);
             this.DropDownItems.Add(patch);
             this.DropDownItems.Add(delete);
         }
 
         /// <summary>
-        /// The name of the type of objects this file menu is for.
-        /// </summary>
-        public string Type;
-
-        /// <summary>
         /// The file extension of the target object.
         /// </summary>
-        public string Extension;
-
-        /// <summary>
-        /// Gets the default directory this file menu saves/load to.
-        /// </summary>
-        public string Directory
-        {
-            get
-            {
-                return this.Type;
-            }
-        }
-
-        /// <summary>
-        /// Gets the full path for the file with the given name.
-        /// </summary>
-        public string GetPath(string Name)
-        {
-            return this.Directory + Path.DirectorySeparatorChar + Name + this.Extension;
-        }
+        public readonly string Extension;
 
         /// <summary>
         /// An event fired when it's time to save the associated object to the given path.
@@ -114,63 +80,111 @@ namespace Hailstone.Interface
         public event Action<string> Patch;
 
         /// <summary>
-        /// Gets the file selection filter.
+        /// Sets up a drop-down menu to allow file-system selection.
         /// </summary>
-        private string _Filter
+        private void _Setup(string Path, ToolStripMenuItem Item, _Mode Mode, Action<string> OnSelect)
         {
-            get
+            if (Mode == _Mode.Save)
             {
-                return String.Format("{0} Files|*{1}|All files|*", this.Type, this.Extension);
+                ToolStripTextBox textbox = new ToolStripTextBox();
+                Item.DropDownItems.Add(textbox);
+                textbox.ToolTipText = "Type a file name here. Press Enter to save, or Control + Enter to make a new folder.";
+                textbox.KeyDown += delegate(object sender, KeyEventArgs e)
+                {
+                    if (e.KeyCode == Keys.Enter)
+                    {
+                        if (e.Control)
+                        {
+                            string dirname = textbox.Text;
+                            string dirpath = Path + System.IO.Path.DirectorySeparatorChar + dirname;
+                            Directory.CreateDirectory(dirpath);
+                            ToolStripMenuItem item = new ToolStripMenuItem(dirname);
+                            this._Setup(dirpath, item, _Mode.Save, OnSelect);
+                            Item.DropDownItems.Insert(1, item);
+                            textbox.Clear();
+                        }
+                        else
+                        {
+                            this.HideDropDown();
+                            OnSelect(Path + System.IO.Path.DirectorySeparatorChar + textbox.Text);
+                        }
+                    }
+                };
+
+                Item.DropDownOpening += delegate
+                {
+                    this._Populate(Path, Item, Mode, OnSelect);
+                };
+                Item.DropDownClosed += delegate
+                {
+                    Item.DropDownItems.Clear();
+                    Item.DropDownItems.Add(textbox);
+                };
+            }
+            else
+            {
+                ToolStripMenuItem dummy = new ToolStripMenuItem("(Nothing Here)");
+                dummy.Enabled = false;
+                Item.DropDownItems.Add(dummy);
+                Item.DropDownOpening += delegate
+                {
+                    if (this._Populate(Path, Item, Mode, OnSelect))
+                    {
+                        Item.DropDownItems.Remove(dummy);
+                    }
+                };
+                Item.DropDownClosed += delegate
+                {
+                    Item.DropDownItems.Clear();
+                    Item.DropDownItems.Add(dummy);
+                };
             }
         }
 
         /// <summary>
-        /// Populates a combo box with items from the directory.
+        /// Recursively a drop-down menu item with files from the given directory.
         /// </summary>
-        private void _Populate(ToolStripComboBox Combo)
+        private bool _Populate(string Path, ToolStripMenuItem Item, _Mode Mode, Action<string> OnSelect)
         {
-            Combo.Items.Clear();
-            foreach (string file in System.IO.Directory.GetFiles(this.Directory))
+            bool has = false;
+            foreach (string file in System.IO.Directory.GetFiles(Path))
             {
-                if (Path.GetExtension(file) == this.Extension)
+                if (System.IO.Path.GetExtension(file) == this.Extension)
                 {
-                    Combo.Items.Add(Path.GetFileNameWithoutExtension(file));
+                    string path = file;
+                    ToolStripItem item = Item.DropDownItems.Add(System.IO.Path.GetFileNameWithoutExtension(path));
+                    item.Click += delegate 
+                    {
+                        this.HideDropDown();
+                        OnSelect(path); 
+                    };
+                    has = true;
                 }
             }
-        }
-        
-        /// <summary>
-        /// Opens a file dialog to select a file to save to.
-        /// </summary>
-        private void _BrowseSave(Action<string> OnSelect)
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = Path.GetFullPath(this.Directory);
-            sfd.Filter = this._Filter;
-            if (sfd.ShowDialog() == DialogResult.OK)
+            foreach (string directory in System.IO.Directory.GetDirectories(Path))
             {
-                if (OnSelect != null)
+                string path = directory;
+                ToolStripMenuItem item = new ToolStripMenuItem(System.IO.Path.GetFileName(path));
+                Item.DropDownItems.Add(item);
+                if (Mode == _Mode.Delete) item.Click += delegate 
                 {
-                    OnSelect(sfd.FileName);
-                }
+                    this.HideDropDown();
+                    OnSelect(path); 
+                };
+                this._Setup(path, item, Mode, OnSelect);
+                has = true;
             }
+            return has;
         }
 
         /// <summary>
-        /// Opens a file dialog to select a file to load from.
+        /// Represents a file selection mode.
         /// </summary>
-        private void _BrowseLoad(Action<string> OnSelect)
+        private enum _Mode
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = Path.GetFullPath(this.Directory);
-            ofd.Filter = this._Filter;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                if (OnSelect != null)
-                {
-                    OnSelect(ofd.FileName);
-                }
-            }
+            Save,
+            Load,
+            Delete
         }
     }
 }
