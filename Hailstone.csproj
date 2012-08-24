@@ -68,6 +68,7 @@
     <Compile Include="Atlas.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Interface\Auto.cs" />
+    <Compile Include="Interface\Composite.cs" />
     <Compile Include="Interface\EditorForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 using Hailstone.UI;
+using Hailstone.Interface;
 
 namespace Hailstone
 {
@@ -17,6 +18,7 @@ namespace Hailstone
         [STAThread]
         public static void Main()
         {
+            Initialize();
             Application.EnableVisualStyles();
             MainForm form = new MainForm();
             Timer trender = new Timer();
@@ -28,6 +30,19 @@ namespace Hailstone
             tupdate.Tick += delegate { form.Update(0.01); };
             tupdate.Start();
             Application.Run(form);
+        }
+
+        /// <summary>
+        /// Creates the interface for the program.
+        /// </summary>
+        public static void Initialize()
+        {
+            new DoubleTypeInterface().Register();
+            new IntegerTypeInterface().Register();
+            new StringTypeInterface().Register();
+            new AutoTypeInterface(typeof(Settings.Color)).Register();
+            new AutoTypeInterface(typeof(Settings.ExtendedColor)).Register();
+            new AutoTypeInterface(typeof(Settings)).Register();
         }
     }
 }

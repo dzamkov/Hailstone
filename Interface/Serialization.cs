@@ -16,8 +16,9 @@ namespace Hailstone.Interface
         /// </summary>
         public static void Save<T>(string Name, T Initial, T Object, Stream Stream)
         {
+            TypeInterface type = TypeInterface.Get(typeof(T));
             List<string> code = new List<string>();
-            if (TypeInterface.Get<T>().Mutate(Name, Initial, Object, code))
+            if (type.Mutate(Global.Default, Name, Initial, Object, code))
             {
                 using (TextWriter txt = new StreamWriter(Stream))
                 {
@@ -36,9 +37,9 @@ namespace Hailstone.Interface
         /// </summary>
         public static void Load<T>(string Name, ref T Initial, Stream Stream)
         {
-            ITypeInterface<T> ti = TypeInterface.Get<T>();
-            Lua.lua_State state = Global.Initialize();
-            ti.Push(state, Initial);
+            TypeInterface type = TypeInterface.Get(typeof(T));
+            Lua.lua_State state = Global.Default.Instantiate();
+            type.Push(state, Initial);
             Lua.lua_setglobal(state, Name);
 
             string code;
@@ -62,7 +63,7 @@ namespace Hailstone.Interface
             }
 
             Lua.lua_getglobal(state, Name);
-            Initial = ti.To(state, -1);
+            Initial = (T)type.To(state, -1);
         }
     }
 }

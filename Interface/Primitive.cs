@@ -6,36 +6,22 @@ using KopiLua;
 namespace Hailstone.Interface
 {
     /// <summary>
-    /// A type interface for several primitive types.
+    /// A type interface for a double.
     /// </summary>
-    public class PrimitiveTypeInterface : ITypeInterface<double>, ITypeInterface<int>, ITypeInterface<string>
+    public class DoubleTypeInterface : TypeInterface
     {
-        private PrimitiveTypeInterface()
+        public DoubleTypeInterface()
+            : base(typeof(double))
         {
 
         }
 
-        /// <summary>
-        /// The only instance of this class.
-        /// </summary>
-        public static readonly PrimitiveTypeInterface Instance = new PrimitiveTypeInterface();
-
-        /// <summary>
-        /// Registers the primitive type interface.
-        /// </summary>
-        public static void Register()
+        public override void Push(Lua.lua_State State, object Object)
         {
-            TypeInterface.Set<double>(PrimitiveTypeInterface.Instance);
-            TypeInterface.Set<int>(PrimitiveTypeInterface.Instance);
-            TypeInterface.Set<string>(PrimitiveTypeInterface.Instance);
+            Lua.lua_pushnumber(State, (double)Object);
         }
 
-        void ITypeInterface<double>.Push(Lua.lua_State State, double Object)
-        {
-            Lua.lua_pushnumber(State, Object);
-        }
-
-        double ITypeInterface<double>.To(Lua.lua_State State, int Index)
+        public override object To(Lua.lua_State State, int Index)
         {
             if (Lua.lua_isnumber(State, Index) > 0)
                 return Lua.lua_tonumber(State, Index);
@@ -43,23 +29,29 @@ namespace Hailstone.Interface
                 throw new Exception(String.Format("Expected number (Got {0}).", Lua.lua_typename(State, Index).ToString()));
         }
 
-        string ITypeInterface<double>.Create(double Object)
+        public override string Create(Global Global, object Object)
         {
-            return Object.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return ((double)Object).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+    }
+
+    /// <summary>
+    /// A type interface for an integer.
+    /// </summary>
+    public class IntegerTypeInterface : TypeInterface
+    {
+        public IntegerTypeInterface()
+            : base(typeof(int))
+        {
+
         }
 
-        bool ITypeInterface<double>.Mutate(string Name, double From, double To, List<string> Code)
+        public override void Push(Lua.lua_State State, object Object)
         {
-            if (From != To) Code.Add(Name + " = " + To.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            return true;
+            Lua.lua_pushinteger(State, (int)Object);
         }
 
-        void ITypeInterface<int>.Push(Lua.lua_State State, int Object)
-        {
-            Lua.lua_pushinteger(State, Object);
-        }
-
-        int ITypeInterface<int>.To(Lua.lua_State State, int Index)
+        public override object To(Lua.lua_State State, int Index)
         {
             if (Lua.lua_isnumber(State, Index) > 0)
                 return (int)Lua.lua_tonumber(State, Index);
@@ -67,23 +59,29 @@ namespace Hailstone.Interface
                 throw new Exception(String.Format("Expected integer (Got {0}).", Lua.lua_typename(State, Index).ToString()));
         }
 
-        string ITypeInterface<int>.Create(int Object)
+        public override string Create(Global Global, object Object)
         {
-            return Object.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return Object.ToString();
+        }
+    }
+
+    /// <summary>
+    /// A type interface for a string.
+    /// </summary>
+    public class StringTypeInterface : TypeInterface
+    {
+        public StringTypeInterface()
+            : base(typeof(string))
+        {
+
         }
 
-        bool ITypeInterface<int>.Mutate(string Name, int From, int To, List<string> Code)
+        public override void Push(Lua.lua_State State, object Object)
         {
-            if (From != To) Code.Add(Name + " = " + To.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            return true;
+            Lua.lua_pushstring(State, (string)Object);
         }
 
-        void ITypeInterface<string>.Push(Lua.lua_State State, string Object)
-        {
-            Lua.lua_pushstring(State, Object);
-        }
-
-        string ITypeInterface<string>.To(Lua.lua_State State, int Index)
+        public override object To(Lua.lua_State State, int Index)
         {
             if (Lua.lua_isstring(State, Index) > 0)
                 return Lua.lua_tostring(State, Index).ToString();
@@ -91,15 +89,9 @@ namespace Hailstone.Interface
                 throw new Exception(String.Format("Expected string (Got {0}).", Lua.lua_typename(State, Index).ToString()));
         }
 
-        string ITypeInterface<string>.Create(string Object)
+        public override string Create(Global Global, object Object)
         {
-            return Object;
-        }
-
-        bool ITypeInterface<string>.Mutate(string Name, string From, string To, List<string> Code)
-        {
-            if (From != To) Code.Add(Name + " = " + To);
-            return true;
+            return String.Format("\"{0}\"", Object);
         }
     }
 }

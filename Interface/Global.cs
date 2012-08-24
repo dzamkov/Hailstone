@@ -5,14 +5,20 @@ using KopiLua;
 namespace Hailstone.Interface
 {
     /// <summary>
-    /// Contains information about the global functions and values that are part of the interface.
+    /// Defines a global context for Lua.
     /// </summary>
-    public static class Global
+    public class Global
     {
         /// <summary>
-        /// Creates a new Lua state with all globals included.
+        /// The default global context, which should include constructors and functions needed to define common objects without
+        /// allowing significant state changes.
         /// </summary>
-        public static Lua.lua_State Initialize()
+        public static Global Default = new Global();
+
+        /// <summary>
+        /// Creates a new Lua state in this global context.
+        /// </summary>
+        public Lua.lua_State Instantiate()
         {
             return Lua.luaL_newstate();
         }

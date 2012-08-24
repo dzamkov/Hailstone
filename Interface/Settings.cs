@@ -87,10 +87,6 @@ namespace Hailstone.Interface
 
         static Settings()
         {
-            PrimitiveTypeInterface.Register();
-            AutoTypeInterface<Settings>.Register();
-            AutoTypeInterface<Color>.Register();
-            AutoTypeInterface<ExtendedColor>.Register();
             Load("Default", ref Current);
         }
 
