@@ -145,6 +145,63 @@ namespace Hailstone
     }
 
     /// <summary>
+    /// A render context using VBO's.
+    /// </summary>
+    public sealed class VBORender : Render
+    {
+        public VBORender(uint ID, float[] Buffer, BeginMode Mode)
+        {
+            this._ID = ID;
+            this._BeginMode = Mode;
+            this._Buffer = Buffer;
+        }
+
+        /// <summary>
+        /// Creates and initializes a VBO for use with a render context.
+        /// </summary>
+        public static uint Initialize()
+        {
+            uint vbo;
+            GL.GenBuffers(1, out vbo);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
+            GL.EnableClientState(ArrayCap.ColorArray);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            int stride = 8 * sizeof(float);
+            GL.TexCoordPointer(2, TexCoordPointerType.Float, stride, 0);
+            GL.ColorPointer(4, ColorPointerType.Float, stride, 2 * sizeof(float));
+            GL.VertexPointer(2, VertexPointerType.Float, stride, 6 * sizeof(float));
+            return vbo;
+        }
+
+        public override void Vertex(double X, double Y, double U, double V, Color4 Color)
+        {
+            this._Buffer[this._Position + 0] = (float)U;
+            this._Buffer[this._Position + 1] = (float)V;
+            this._Buffer[this._Position + 2] = Color.R;
+            this._Buffer[this._Position + 3] = Color.G;
+            this._Buffer[this._Position + 4] = Color.B;
+            this._Buffer[this._Position + 5] = Color.A;
+            this._Buffer[this._Position + 6] = (float)X;
+            this._Buffer[this._Position + 7] = (float)Y;
+            this._Position += 8;
+        }
+
+        public override void Finish()
+        {
+            GL.BindBuffer(BufferTarget.ArrayBuffer, this._ID);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(this._Buffer.Length * sizeof(float)), IntPtr.Zero, BufferUsageHint.StreamDraw);
+            GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, (IntPtr)(this._Position * sizeof(float)), this._Buffer);
+            GL.DrawArrays(this._BeginMode, 0, this._Position / 8);
+        }
+
+        private uint _ID;
+        private BeginMode _BeginMode;
+        private float[] _Buffer;
+        private int _Position;
+    }
+
+    /// <summary>
     /// Contains information for drawing a shape or figure from a texture.
     /// </summary>
     public struct Shape

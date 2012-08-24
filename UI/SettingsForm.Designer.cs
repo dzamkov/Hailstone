@@ -49,10 +49,11 @@
             // 
             this._Selector.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this._Selector.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._Selector.FormattingEnabled = true;
             this._Selector.Location = new System.Drawing.Point(0, 2);
             this._Selector.Name = "_Selector";
-            this._Selector.Size = new System.Drawing.Size(128, 21);
+            this._Selector.Size = new System.Drawing.Size(128, 23);
             this._Selector.TabIndex = 4;
             // 
             // _SaveButton
@@ -60,7 +61,7 @@
             this._SaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._SaveButton.Location = new System.Drawing.Point(134, 2);
             this._SaveButton.Name = "_SaveButton";
-            this._SaveButton.Size = new System.Drawing.Size(43, 21);
+            this._SaveButton.Size = new System.Drawing.Size(43, 23);
             this._SaveButton.TabIndex = 5;
             this._SaveButton.Text = "Save";
             this._SaveButton.UseVisualStyleBackColor = true;
@@ -71,7 +72,7 @@
             this._LoadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._LoadButton.Location = new System.Drawing.Point(183, 2);
             this._LoadButton.Name = "_LoadButton";
-            this._LoadButton.Size = new System.Drawing.Size(39, 21);
+            this._LoadButton.Size = new System.Drawing.Size(39, 23);
             this._LoadButton.TabIndex = 6;
             this._LoadButton.Text = "Load";
             this._LoadButton.UseVisualStyleBackColor = true;
@@ -81,7 +82,7 @@
             // 
             this._Delete.Location = new System.Drawing.Point(228, 2);
             this._Delete.Name = "_Delete";
-            this._Delete.Size = new System.Drawing.Size(48, 21);
+            this._Delete.Size = new System.Drawing.Size(48, 23);
             this._Delete.TabIndex = 7;
             this._Delete.Text = "Delete";
             this._Delete.UseVisualStyleBackColor = true;
