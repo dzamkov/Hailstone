@@ -28,8 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this._TextEditor = new ICSharpCode.TextEditor.TextEditorControl();
             this._MenuStrip = new System.Windows.Forms.MenuStrip();
+            this._CodeCompletionImageList = new System.Windows.Forms.ImageList(this.components);
             this.SuspendLayout();
             // 
             // _TextEditor
@@ -47,6 +49,12 @@
             this._MenuStrip.Name = "_MenuStrip";
             this._MenuStrip.Size = new System.Drawing.Size(414, 24);
             this._MenuStrip.TabIndex = 1;
+            // 
+            // _CodeCompletionImageList
+            // 
+            this._CodeCompletionImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this._CodeCompletionImageList.ImageSize = new System.Drawing.Size(16, 16);
+            this._CodeCompletionImageList.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // EditorForm
             // 
@@ -68,6 +76,7 @@
 
         private ICSharpCode.TextEditor.TextEditorControl _TextEditor;
         private System.Windows.Forms.MenuStrip _MenuStrip;
+        private System.Windows.Forms.ImageList _CodeCompletionImageList;
 
     }
 }
