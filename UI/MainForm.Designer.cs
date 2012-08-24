@@ -32,6 +32,7 @@
             this._ToolsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._SettingsButton = new System.Windows.Forms.ToolStripMenuItem();
             this._GLControl = new OpenTK.GLControl();
+            this._EditorButton = new System.Windows.Forms.ToolStripMenuItem();
             this._MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -47,6 +48,7 @@
             // _ToolsMenu
             // 
             this._ToolsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._EditorButton,
             this._SettingsButton});
             this._ToolsMenu.Name = "_ToolsMenu";
             this._ToolsMenu.Size = new System.Drawing.Size(48, 20);
@@ -69,9 +71,16 @@
             this._GLControl.TabIndex = 1;
             this._GLControl.VSync = false;
             this._GLControl.Load += new System.EventHandler(this._GLControl_Load);
-            this._GLControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this._GLControl_MouseDown);
             this._GLControl.MouseWheel += new System.Windows.Forms.MouseEventHandler(this._GLControl_MouseWheel);
+            this._GLControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this._GLControl_MouseDown);
             this._GLControl.Resize += new System.EventHandler(this._GLControl_Resize);
+            // 
+            // _EditorButton
+            // 
+            this._EditorButton.Name = "_EditorButton";
+            this._EditorButton.Size = new System.Drawing.Size(152, 22);
+            this._EditorButton.Text = "Editor";
+            this._EditorButton.Click += new System.EventHandler(this._EditorButton_Click);
             // 
             // MainForm
             // 
@@ -97,5 +106,6 @@
         private OpenTK.GLControl _GLControl;
         private System.Windows.Forms.ToolStripMenuItem _ToolsMenu;
         private System.Windows.Forms.ToolStripMenuItem _SettingsButton;
+        private System.Windows.Forms.ToolStripMenuItem _EditorButton;
     }
 }

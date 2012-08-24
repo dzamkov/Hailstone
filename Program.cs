@@ -14,6 +14,7 @@ namespace Hailstone
         /// <summary>
         /// Program main entry-point.
         /// </summary>
+        [STAThread]
         public static void Main()
         {
             Application.EnableVisualStyles();

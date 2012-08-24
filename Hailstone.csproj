@@ -41,9 +41,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
+    <Reference Include="ICSharpCode.TextEditor, Version=3.2.0.5777, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\ICSharpCode.TextEditor.dll</HintPath>
+    </Reference>
     <Reference Include="Lua, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Lua.dll</HintPath>
+      <HintPath>Lib\Lua.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -64,6 +68,12 @@
     <Compile Include="Atlas.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Interface\Auto.cs" />
+    <Compile Include="Interface\EditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Interface\EditorForm.Designer.cs">
+      <DependentUpon>EditorForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Interface\Global.cs" />
     <Compile Include="Interface\Primitive.cs" />
     <Compile Include="Interface\Serialization.cs" />
@@ -106,6 +116,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Interface\Lua.xml" />
     <None Include="Resources\Atlas.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

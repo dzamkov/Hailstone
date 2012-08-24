@@ -1,0 +1,74 @@
+﻿<?xml version="1.0"?>
+<SyntaxDefinition name="Lua" extensions=".lua">
+  <Digits name="Digits" bold="false" italic="false" color="DarkBlue" />
+  <RuleSets>
+    <RuleSet ignorecase="false">
+      <Delimiters>&amp;&lt;&gt;~!%^*()-+=|\#/{}[]:;"' ,	.?</Delimiters>
+      <Span name="String" bold="false" italic="false" color="Red" stopateol="true" escapecharacter="\">
+        <Begin>"</Begin>
+        <End>"</End>
+      </Span>
+      <Span name="String" bold="false" italic="false" color="Red" stopateol="true" escapecharacter="\">
+        <Begin>'</Begin>
+        <End>'</End>
+      </Span>
+      <Span name="LineComment" bold="false" italic="false" color="Green" stopateol="true">
+        <Begin>//</Begin>
+      </Span>
+      <Span name="LineComment" bold="false" italic="false" color="Green" stopateol="true">
+        <Begin>--</Begin>
+      </Span>
+      <MarkPrevious bold="true" italic="false" color="MidnightBlue">(</MarkPrevious>
+      <KeyWords name="Punctuation" bold="false" italic="false" color="DarkGreen">
+        <Key word="?" />
+        <Key word="," />
+        <Key word="." />
+        <Key word=";" />
+        <Key word="(" />
+        <Key word=")" />
+        <Key word="[" />
+        <Key word="]" />
+        <Key word="{" />
+        <Key word="}" />
+        <Key word="+" />
+        <Key word="-" />
+        <Key word="/" />
+        <Key word="%" />
+        <Key word="*" />
+        <Key word="&lt;" />
+        <Key word="&gt;" />
+        <Key word="^" />
+        <Key word="=" />
+        <Key word="~" />
+        <Key word="!" />
+        <Key word="|" />
+        <Key word="&amp;" />
+      </KeyWords>
+      <KeyWords name="ControlKeywords" bold="true" italic="false" color="Blue">
+        <Key word="function" />
+        <Key word="do" />
+        <Key word="if" />
+        <Key word="then" />
+        <Key word="else" />
+        <Key word="elseif" />
+        <Key word="end" />
+        <Key word="local" />
+        <Key word="break" />
+        <Key word="return" />
+        <Key word="until" />
+        <Key word="while" />
+        <Key word="repeat" />
+      </KeyWords>
+      <KeyWords name="Operators" bold="false" italic="false" color="Blue">
+        <Key word="or" />
+        <Key word="and" />
+        <Key word="not" />
+      </KeyWords>
+      <KeyWords name="Literals" bold="false" italic="false" color="DarkCyan">
+        <Key word="true" />
+        <Key word="false" />
+        <Key word="nil" />
+      </KeyWords>
+    </RuleSet>
+  </RuleSets>
+</SyntaxDefinition>

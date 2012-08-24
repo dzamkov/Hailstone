@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.ComponentModel;
-using System.Xml.Serialization;
 using System.IO;
 
 using OpenTK;

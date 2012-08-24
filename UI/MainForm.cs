@@ -155,6 +155,11 @@ namespace Hailstone.UI
             SettingsForm.Show();
         }
 
+        private void _EditorButton_Click(object sender, EventArgs e)
+        {
+            new Interface.EditorForm().Show();
+        }
+
         private bool _Loaded;
         private Camera _Camera;
         private Domain _Domain;
