@@ -106,7 +106,7 @@ namespace Hailstone.Interface
                         else
                         {
                             this.HideDropDown();
-                            OnSelect(Path + System.IO.Path.DirectorySeparatorChar + textbox.Text);
+                            OnSelect(Path + System.IO.Path.DirectorySeparatorChar + textbox.Text + this.Extension);
                         }
                     }
                 };
@@ -117,6 +117,7 @@ namespace Hailstone.Interface
                 };
                 Item.DropDownClosed += delegate
                 {
+                    textbox.Clear();
                     Item.DropDownItems.Clear();
                     Item.DropDownItems.Add(textbox);
                 };

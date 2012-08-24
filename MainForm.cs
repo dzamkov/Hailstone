@@ -152,7 +152,9 @@ namespace Hailstone
 
         private void _SettingsButton_Click(object sender, EventArgs e)
         {
-            new PropertyForm("Settings", Settings.Current).Show();
+            PropertyForm form = new PropertyForm(TypeInterface.Get(typeof(Settings)), () => Settings.Default, Settings.Current);
+            form.ObjectChanged += delegate(object settings) { Settings.Current = (Settings)settings; };
+            form.Show();
         }
 
         private void _EditorButton_Click(object sender, EventArgs e)

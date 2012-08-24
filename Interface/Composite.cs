@@ -10,8 +10,8 @@ namespace Hailstone.Interface
     /// </summary>
     public class CompositeTypeInterface : TypeInterface
     {
-        public CompositeTypeInterface(IEnumerable<Member> Members, Type Type)
-            : base(Type)
+        public CompositeTypeInterface(IEnumerable<Member> Members, Type Type, string Name)
+            : base(Type, Name)
         {
             this._Members = new Dictionary<string, Member>();
             foreach (Member member in Members)

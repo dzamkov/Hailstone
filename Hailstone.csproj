@@ -80,7 +80,6 @@
     </Compile>
     <Compile Include="Interface\Global.cs" />
     <Compile Include="Interface\Primitive.cs" />
-    <Compile Include="Interface\Serialization.cs" />
     <Compile Include="Interface\TypeInterface.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

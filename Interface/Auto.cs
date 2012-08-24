@@ -11,7 +11,7 @@ namespace Hailstone.Interface
     public class AutoTypeInterface : CompositeTypeInterface
     {
         public AutoTypeInterface(Type Type)
-            : base(GetMembers(Type), Type)
+            : base(GetMembers(Type), Type, Type.Name)
         {
 
         }

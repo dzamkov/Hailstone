@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.IO;
 using KopiLua;
 
 namespace Hailstone.Interface
@@ -10,15 +11,21 @@ namespace Hailstone.Interface
     /// </summary>
     public abstract class TypeInterface
     {
-        public TypeInterface(Type Type)
+        public TypeInterface(Type Type, string Name)
         {
             this.Type = Type;
+            this.Name = Name;
         }
 
         /// <summary>
         /// The type this type interface works on.
         /// </summary>
         public readonly Type Type;
+
+        /// <summary>
+        /// A user-friendly name of this type. This does not have to be unique.
+        /// </summary>
+        public readonly string Name;
 
         /// <summary>
         /// Pushes a Lua representation of the given object to the Lua stack.
@@ -53,6 +60,59 @@ namespace Hailstone.Interface
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Saves the change between two objects of this type to the given stream.
+        /// </summary>
+        public void Save(Global Global, object From, object To, Stream Stream)
+        {
+            List<string> code = new List<string>();
+            if (this.Mutate(Global, this.Name, From, To, code))
+            {
+                using (TextWriter txt = new StreamWriter(Stream))
+                {
+                    foreach (string line in code)
+                        txt.WriteLine(line);
+                }
+            }
+            else
+            {
+                throw new Exception("Could not serialize object.");
+            }
+        }
+
+        /// <summary>
+        /// Loads the changes from the given stream and applies them to the given object.
+        /// </summary>
+        public void Load(Global Global, ref object Object, Stream Stream)
+        {
+            Lua.lua_State state = Global.Default.Instantiate();
+            this.Push(state, Object);
+            Lua.lua_setglobal(state, this.Name);
+
+            string code;
+            using (TextReader txt = new StreamReader(Stream))
+            {
+                code = txt.ReadToEnd();
+            }
+
+            int compileerr = Lua.luaL_loadstring(state, code);
+            if (compileerr != 0)
+            {
+                string error = Lua.lua_tostring(state, -1).ToString();
+                throw new Exception(error);
+            }
+
+            int runerr = Lua.lua_pcall(state, 0, 0, 0);
+            if (runerr != 0)
+            {
+                string error = Lua.lua_tostring(state, -1).ToString();
+                throw new Exception(error);
+            }
+
+            Lua.lua_getglobal(state, this.Name);
+            Object = this.To(state, -1);
         }
 
         /// <summary>

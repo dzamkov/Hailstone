@@ -11,7 +11,7 @@ namespace Hailstone.Interface
     public class DoubleTypeInterface : TypeInterface
     {
         public DoubleTypeInterface()
-            : base(typeof(double))
+            : base(typeof(double), "Number")
         {
 
         }
@@ -41,7 +41,7 @@ namespace Hailstone.Interface
     public class IntegerTypeInterface : TypeInterface
     {
         public IntegerTypeInterface()
-            : base(typeof(int))
+            : base(typeof(int), "Integer")
         {
 
         }
@@ -71,7 +71,7 @@ namespace Hailstone.Interface
     public class StringTypeInterface : TypeInterface
     {
         public StringTypeInterface()
-            : base(typeof(string))
+            : base(typeof(string), "String")
         {
 
         }
