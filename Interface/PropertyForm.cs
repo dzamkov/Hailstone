@@ -64,7 +64,7 @@ namespace Hailstone.Interface
         /// </summary>
         private void _Save(string Path)
         {
-            using (FileStream stream = File.OpenWrite(Path))
+            using (FileStream stream = File.Open(Path, FileMode.Create))
             {
                 this.Type.Save(Global.Default, this.Default(), this.Object, stream);
             }
@@ -91,7 +91,7 @@ namespace Hailstone.Interface
         /// </summary>
         private void _Load(object Initial, string Path)
         {
-            using (FileStream stream = File.OpenRead(Path))
+            using (FileStream stream = File.Open(Path, FileMode.Open))
             {
                 this.Type.Load(Global.Default, ref Initial, stream);
                 this.Object = Initial;

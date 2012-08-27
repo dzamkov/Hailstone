@@ -147,35 +147,43 @@ namespace Hailstone.Interface
         /// </summary>
         private bool _Populate(string Path, ToolStripMenuItem Item, _Mode Mode, Action<string> OnSelect)
         {
-            bool has = false;
-            foreach (string file in System.IO.Directory.GetFiles(Path))
+            if (Directory.Exists(Path))
             {
-                if (System.IO.Path.GetExtension(file) == this.Extension)
+                bool has = false;
+                foreach (string file in System.IO.Directory.GetFiles(Path))
                 {
-                    string path = file;
-                    ToolStripItem item = Item.DropDownItems.Add(System.IO.Path.GetFileNameWithoutExtension(path));
-                    item.Click += delegate 
+                    if (System.IO.Path.GetExtension(file) == this.Extension)
+                    {
+                        string path = file;
+                        ToolStripItem item = Item.DropDownItems.Add(System.IO.Path.GetFileNameWithoutExtension(path));
+                        item.Click += delegate
+                        {
+                            this.HideDropDown();
+                            OnSelect(path);
+                        };
+                        has = true;
+                    }
+                }
+                foreach (string directory in System.IO.Directory.GetDirectories(Path))
+                {
+                    string path = directory;
+                    ToolStripMenuItem item = new ToolStripMenuItem(System.IO.Path.GetFileName(path));
+                    Item.DropDownItems.Add(item);
+                    if (Mode == _Mode.Delete) item.Click += delegate
                     {
                         this.HideDropDown();
-                        OnSelect(path); 
+                        OnSelect(path);
                     };
+                    this._Setup(path, item, Mode, OnSelect);
                     has = true;
                 }
+                return has;
             }
-            foreach (string directory in System.IO.Directory.GetDirectories(Path))
+            else
             {
-                string path = directory;
-                ToolStripMenuItem item = new ToolStripMenuItem(System.IO.Path.GetFileName(path));
-                Item.DropDownItems.Add(item);
-                if (Mode == _Mode.Delete) item.Click += delegate 
-                {
-                    this.HideDropDown();
-                    OnSelect(path); 
-                };
-                this._Setup(path, item, Mode, OnSelect);
-                has = true;
+                Directory.CreateDirectory(Path);
+                return false;
             }
-            return has;
         }
 
         /// <summary>
